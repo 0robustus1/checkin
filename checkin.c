@@ -81,6 +81,9 @@ void create_table(sqlite3 *handle)
 void show_timeslot(struct Timeslot *timeslot)
 {
   printf("Timeslot (%i)\n",timeslot->id);
+  int hours = 0;
+  int minutes = 0;
+  calculate_difference(timeslot,&hours,&minutes);
   if( ((timeslot->begins).tm_mday == (timeslot->ends).tm_mday) && ((timeslot->begins).tm_mon == (timeslot->ends).tm_mon) && ((timeslot->begins).tm_year == (timeslot->ends).tm_year) )
   {
     char *dateOutput = (char *) malloc(11 * sizeof(char));
@@ -101,5 +104,22 @@ void show_timeslot(struct Timeslot *timeslot)
     strftime(endsOutput, 20, "%d.%m.%Y %T", &(timeslot->ends));
     printf("\tStarted: %s\n",beginsOutput);
     printf("\tEnded:   %s\n",endsOutput);
+  }
+  printf("\tDuration: ");
+  if( hours!=0 )
+    printf("%ih ",hours);
+  printf("%im",minutes);
+  printf("\n");
+}
+
+
+void calculate_difference(struct Timeslot *ts, int *hours, int *minutes)
+{
+  if( ((ts->begins).tm_mday == (ts->ends).tm_mday) && ((ts->begins).tm_mon == (ts->ends).tm_mon) && ((ts->begins).tm_year == (ts->ends).tm_year) )
+  {
+    *hours = abs( (ts->ends).tm_hour - (ts->begins).tm_hour );
+    *minutes = abs( (ts->ends).tm_min - (ts->begins).tm_min );
+    if( (ts->ends).tm_min < (ts->begins).tm_min )
+      *hours -= 1;
   }
 }
