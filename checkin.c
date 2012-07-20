@@ -92,5 +92,14 @@ void show_timeslot(struct Timeslot *timeslot)
     printf("\t%s\n",dateOutput);
     printf("\tStarted: %s\n",beginsOutput);
     printf("\tEnded:   %s\n",endsOutput);
+  } 
+  else
+  {
+    char *beginsOutput = (char *) malloc( 20 * sizeof(char));
+    char *endsOutput = (char *) malloc( 20 * sizeof(char));
+    strftime(beginsOutput, 20, "%d.%m.%Y %T", &(timeslot->begins));
+    strftime(endsOutput, 20, "%d.%m.%Y %T", &(timeslot->ends));
+    printf("\tStarted: %s\n",beginsOutput);
+    printf("\tEnded:   %s\n",endsOutput);
   }
 }
