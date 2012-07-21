@@ -19,6 +19,7 @@ int main(int argc, char*argv[])
         break;
       case 's':
         checkin_status();
+        break;
       default:
         abort ();
     }
@@ -37,7 +38,6 @@ void checkin_list()
   time_t now_epoch;
   time(&now_epoch);
   struct tm *now = localtime(&now_epoch);
-  int id;
   int entries = 0;
   sqlite3 *db_handler;
   sqlite3_open(DATABASE_FILE, &db_handler);
@@ -45,6 +45,7 @@ void checkin_list()
   char *request = (char *) malloc( 81 * sizeof(char) );
   strftime(request, 81, "SELECT * FROM timeslots WHERE ends LIKE \"%Y-%m%%\";", now);
   timeslots = read_entries(db_handler, &entries, request);
+  free(request);
   if (timeslots == NULL) 
   {
     printf("Problem while parsing...");
@@ -58,7 +59,34 @@ void checkin_list()
 
 void checkin_status()
 {
+  time_t now_epoch;
+  time(&now_epoch);
+  struct tm *now = localtime(&now_epoch);
+  int entries = 0;
+  int i;
+  sqlite3 *db_handler;
+  sqlite3_open(DATABASE_FILE, &db_handler);
+  struct Timeslot *timeslots;
+  char *request = (char *) malloc( 81 * sizeof(char) );
+  strftime(request, 81, "SELECT * FROM timeslots WHERE ends LIKE \"%Y-%m%%\";", now);
+  timeslots = read_entries(db_handler, &entries, request);
+  char *output = request;
+  strftime(output, 81, "Status for month: %m/%Y\n\n",now);
+  printf(output);
+  int time_sum = 0;
+  int hours = 0;
+  int minutes = 0;
+  for(i=0;i<entries;i++)
+  {
+    hours = 0;
+    minutes = 0;
+    calculate_difference( (timeslots+i), &hours, &minutes );
+    time_sum += hours*60 + minutes;
+  }
+  printf("Overall working time: %.3dh %.2dm\n", time_sum/60, time_sum%60);
 
+  free(output);
+  free(timeslots);
 }
 
 struct Timeslot* read_entries(sqlite3 *handle, int *counter, char *request)
