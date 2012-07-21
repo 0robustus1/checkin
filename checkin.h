@@ -6,6 +6,7 @@
 
 #include "timeslot.h"
 
-struct Timeslot* read_entries(sqlite3 *handle, int *counter);
+struct Timeslot* read_entries(sqlite3 *handle, int *counter, char *request);
 void create_table(sqlite3 *handle);
-
+void checkin_list();
+void checkin_status();

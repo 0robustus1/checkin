@@ -1,35 +1,71 @@
 #include "checkin.h"
+#include <unistd.h>
 
 const char * DATABASE_FILE = "times.db";
 const char * TIME_FORMAT = "%Y-%m-%d %H:%M:%S";
 int main(int argc, char*argv[])
 {
+  if( argc == 1 )
+    printf("no option specified...\n");
+  int current_opt;
+  while ((current_opt = getopt (argc, argv, "lis")) != -1)
+    switch(current_opt)
+    {
+      case 'l':
+        checkin_list();
+        break;
+      case 'i':
+        printf("interactive mode not implemented yet...\n");
+        break;
+      case 's':
+        checkin_status();
+      default:
+        abort ();
+    }
+  /*int i;*/
+  /*for(i=0;i<entries;i++)*/
+    /*show_timeslot(timeslots + (i*sizeof(struct Timeslot)));*/
+
+
+  
+  return 0;
+
+}
+
+void checkin_list()
+{
+  time_t now_epoch;
+  time(&now_epoch);
+  struct tm *now = localtime(&now_epoch);
   int id;
   int entries = 0;
   sqlite3 *db_handler;
   sqlite3_open(DATABASE_FILE, &db_handler);
   struct Timeslot *timeslots;
-  timeslots = read_entries(db_handler, &entries);
+  char *request = (char *) malloc( 81 * sizeof(char) );
+  strftime(request, 81, "SELECT * FROM timeslots WHERE ends LIKE \"%Y-%m%%\";", now);
+  timeslots = read_entries(db_handler, &entries, request);
   if (timeslots == NULL) 
   {
     printf("Problem while parsing...");
-    return 1;
+    exit(1);
   }
-  /*int i;*/
-  /*for(i=0;i<entries;i++)*/
-    /*show_timeslot(timeslots + (i*sizeof(struct Timeslot)));*/
-  print_month(timeslots, entries, 2012, 7);
+  
+  print_month(timeslots, entries, now->tm_year, now->tm_mon);
   sqlite3_close(db_handler);
-  /*free(timeslots);*/
-  return 0;
+  free(timeslots);
+}
+
+void checkin_status()
+{
 
 }
 
-struct Timeslot* read_entries(sqlite3 *handle, int *counter)
+struct Timeslot* read_entries(sqlite3 *handle, int *counter, char *request)
 {
   sqlite3_stmt *stmt;
 	
-	sqlite3_prepare(handle, "SELECT * FROM timeslots", -1, &stmt, NULL);
+	sqlite3_prepare(handle, request, -1, &stmt, NULL);
 	
   int step = sizeof(struct Timeslot);
   *counter = 0;
