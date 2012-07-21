@@ -1,8 +1,13 @@
 require 'fileutils'
 $flags = %w{-lsqlite3}
 
-file 'checkin' => ["checkin.c", "checkin.h"] do |t|
+task :default => 'checkin'
+
+file 'checkin' => %w{checkin.c checkin.h timeslot.o} do |t|
   sh "gcc #{$flags.join(' ')} -o #{t.name} #{t.prerequisites.join(' ')}"
 end
 
-task :default => 'checkin'
+file 'timeslot.o' => %w{timeslot.c timeslot.h} do |t|
+  sh "gcc -c -o #{t.name} #{t. prerequisites.first}"
+end
+
