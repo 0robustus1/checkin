@@ -1,7 +1,7 @@
 #include "checkin.h"
 
-#define DATABASE_FILE "times.db"
-#define TIME_FORMAT "%Y-%m-%d %H:%M:%S"
+const char * DATABASE_FILE = "times.db";
+const char * TIME_FORMAT = "%Y-%m-%d %H:%M:%S";
 int main(int argc, char*argv[])
 {
   int id;
