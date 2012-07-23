@@ -9,11 +9,11 @@ void show_timeslot(struct Timeslot *ts)
   if( ((ts->begins).tm_mday == (ts->ends).tm_mday) && ((ts->begins).tm_mon == (ts->ends).tm_mon) && ((ts->begins).tm_year == (ts->ends).tm_year) )
   {
     char *dateOutput = (char *) malloc(11 * sizeof(char));
-    char *beginsOutput = (char *) malloc( 9 * sizeof(char));
-    char *endsOutput = (char *) malloc( 9 * sizeof(char));
+    char *beginsOutput = (char *) malloc( 6 * sizeof(char));
+    char *endsOutput = (char *) malloc( 6 * sizeof(char));
     strftime(dateOutput, 11, "%d.%m.%Y",&(ts->begins));
-    strftime(beginsOutput, 9, "%T", &(ts->begins));
-    strftime(endsOutput, 9, "%T", &(ts->ends));
+    strftime(beginsOutput, 6, "%H:%M", &(ts->begins));
+    strftime(endsOutput, 6, "%H:%M", &(ts->ends));
     printf("\t%s\n",dateOutput);
     printf("\tStarted: %s\n",beginsOutput);
     printf("\tEnded:   %s\n",endsOutput);
@@ -42,7 +42,11 @@ void calculate_difference(struct Timeslot *ts, int *hours, int *minutes)
     *hours = abs( (ts->ends).tm_hour - (ts->begins).tm_hour );
     *minutes = abs( (ts->ends).tm_min - (ts->begins).tm_min );
     if( (ts->ends).tm_min < (ts->begins).tm_min )
+    {
       *hours -= 1;
+      *minutes = 60 - *minutes;
+    }
+
   }
 }
 
