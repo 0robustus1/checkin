@@ -2,49 +2,121 @@
 #include <unistd.h>
 
 const char * DATABASE_FILE = "times.db";
-const char * TIME_FORMAT = "%Y-%m-%d %H:%M:%S";
+const char * TIME_FORMAT = "%Y-%m-%d %H:%M:00";
+const int true = 1;
+const int false = 0;
 int main(int argc, char*argv[])
 {
   if( argc == 1 )
     printf("no option specified...\n");
   int current_opt;
-  while ((current_opt = getopt (argc, argv, "lis")) != -1)
+  int mode = CheckinNoMode;
+  int day, month, year, beginsHour, beginsMinute, endsHour, endsMinute;
+  int dset = false;
+  int bset = false;
+  int eset = false;
+  while ((current_opt = getopt (argc, argv, "lisd:b:e:")) != -1)
     switch(current_opt)
     {
       case 'l':
-        checkin_list();
+        mode = CheckinListing;
         break;
       case 'i':
         printf("interactive mode not implemented yet...\n");
         break;
       case 's':
-        checkin_status();
+        mode = CheckinStatus;
+        break;
+      case 'd':
+        sscanf(optarg, "%i.%i.%i", &day, &month, &year);
+        dset = true;
+        break;
+      case 'b':
+        sscanf(optarg, "%i:%i", &beginsHour, &beginsMinute);
+        bset = true;
+        break;
+      case 'e':
+        sscanf(optarg, "%i:%i", &endsHour, &endsMinute);
+        eset = true;
         break;
       default:
         abort ();
     }
+  time_t now_epoch;
+  time(&now_epoch);
+  struct tm *now = localtime(&now_epoch);
+  sqlite3 *db_handler;
+  sqlite3_open(DATABASE_FILE, &db_handler);
+  if( mode != CheckinNoMode )
+  {
+    if( mode == CheckinListing )
+      checkin_list(db_handler, now);
+    else if( mode == CheckinStatus )
+      checkin_status(db_handler, now);
+    sqlite3_close(db_handler);
+    return 0;
+  }
   /*int i;*/
   /*for(i=0;i<entries;i++)*/
     /*show_timeslot(timeslots + (i*sizeof(struct Timeslot)));*/
-
-
-  
+  if( !(bset && eset) )
+    return 1;
+  if( !dset )
+  {
+    year = now->tm_year+1900;
+    month = now->tm_mon+1;
+    day = now->tm_mday;
+  }
+  struct tm begins = {
+    .tm_year  = year-1900,
+    .tm_mon   = month-1,
+    .tm_mday  = day,
+    .tm_hour  = beginsHour-1,
+    .tm_min   = beginsMinute
+  };
+  struct tm ends = {
+    .tm_year  = year-1900,
+    .tm_mon   = month-1,
+    .tm_mday  = day,
+    .tm_hour  = endsHour-1,
+    .tm_min   = endsMinute
+  };
+  mktime(&begins);
+  mktime(&ends);
+  checkin_add(db_handler, &begins, &ends);
+  sqlite3_close(db_handler);
   return 0;
 
 }
 
-void checkin_list()
+void checkin_add(sqlite3 *handle, struct tm *begins, struct tm *ends)
 {
-  time_t now_epoch;
-  time(&now_epoch);
-  struct tm *now = localtime(&now_epoch);
+  char *request = (char *) malloc( 125 * sizeof(char) );
+  char *beginsString = (char *) malloc( 20 * sizeof(char) );
+  char *endsString = (char *) malloc( 20 * sizeof(char) );
+  strftime(beginsString, 20, TIME_FORMAT, begins); 
+  strftime(endsString, 20, TIME_FORMAT, ends); 
+  sprintf(request,
+          "INSERT INTO timeslots (begins,ends) VALUES (\"%s\",\"%s\");",
+          beginsString,
+          endsString
+         );
+  sqlite3_stmt *stmt;
+  sqlite3_prepare(handle, request, -1, &stmt, NULL);
+  if( sqlite3_step(stmt) == -1 )
+  {
+    printf("Problem encountered while trying to save...\n");
+    exit(1);
+  }
+}
+
+void checkin_list(sqlite3 *handle, struct tm *now)
+{
   int entries = 0;
-  sqlite3 *db_handler;
-  sqlite3_open(DATABASE_FILE, &db_handler);
   struct Timeslot *timeslots;
   char *request = (char *) malloc( 81 * sizeof(char) );
   strftime(request, 81, "SELECT * FROM timeslots WHERE ends LIKE \"%Y-%m%%\";", now);
-  timeslots = read_entries(db_handler, &entries, request);
+  timeslots = read_entries(handle, &entries, request);
   free(request);
   if (timeslots == NULL) 
   {
@@ -53,23 +125,17 @@ void checkin_list()
   }
   
   print_month(timeslots, entries, now->tm_year, now->tm_mon);
-  sqlite3_close(db_handler);
   free(timeslots);
 }
 
-void checkin_status()
+void checkin_status(sqlite3 *handle, struct tm *now)
 {
-  time_t now_epoch;
-  time(&now_epoch);
-  struct tm *now = localtime(&now_epoch);
   int entries = 0;
   int i;
-  sqlite3 *db_handler;
-  sqlite3_open(DATABASE_FILE, &db_handler);
   struct Timeslot *timeslots;
   char *request = (char *) malloc( 81 * sizeof(char) );
   strftime(request, 81, "SELECT * FROM timeslots WHERE ends LIKE \"%Y-%m%%\";", now);
-  timeslots = read_entries(db_handler, &entries, request);
+  timeslots = read_entries(handle, &entries, request);
   char *output = request;
   strftime(output, 81, "Status for month: %m/%Y\n\n",now);
   printf(output);
@@ -111,12 +177,18 @@ struct Timeslot* read_entries(sqlite3 *handle, int *counter, char *request)
       printf("Error while parsing \"begins\"\n");
     if (strptime(endsRaw, TIME_FORMAT, &ends) == 0)
       printf("Error while parsing \"ends\"\n");
+    /*Wrong values in tm_sec could alter important values*/
+    begins.tm_sec = 0;
+    begins.tm_sec = 0;
+    /*Normalize the values.*/
+    mktime(&begins);
+    mktime(&ends);
     struct Timeslot timeslot = {
       .id = currentId,
       .begins = begins,
       .ends = ends
     };
-    *(timeslots + (*counter*step)) = timeslot; 
+    *(timeslots + (*counter)) = timeslot; 
     *counter+=1;
 	}
   if (*counter==0)
