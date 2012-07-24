@@ -15,3 +15,6 @@ void checkin_add(sqlite3 *handle, struct tm *begins, struct tm *ends);
 enum CheckinModes {
   CheckinNoMode, CheckinListing, CheckinStatus
 };
+enum CheckinDateModes {
+  NoDateSet, DateSet, DateWithoutDaySet
+};

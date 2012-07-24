@@ -2,7 +2,8 @@
 #include <unistd.h>
 
 const char * DATABASE_FILE = "times.db";
-const char * TIME_FORMAT = "%Y-%m-%d %H:%M:00";
+const char * CONFIG_PATH   = ".config/checkin/";
+const char * TIME_FORMAT   = "%Y-%m-%d %H:%M:00";
 const int true = 1;
 const int false = 0;
 int main(int argc, char*argv[])
@@ -12,9 +13,11 @@ int main(int argc, char*argv[])
   int current_opt;
   int mode = CheckinNoMode;
   int day, month, year, beginsHour, beginsMinute, endsHour, endsMinute;
-  int dset = false;
+  int dset = NoDateSet;
   int bset = false;
   int eset = false;
+  char * db_file = (char *) malloc( 120 * sizeof(char) );
+  sprintf(db_file, "%s/%s/%s",getenv("HOME"),CONFIG_PATH,DATABASE_FILE);
   while ((current_opt = getopt (argc, argv, "lisd:b:e:")) != -1)
     switch(current_opt)
     {
@@ -28,8 +31,16 @@ int main(int argc, char*argv[])
         mode = CheckinStatus;
         break;
       case 'd':
-        sscanf(optarg, "%i.%i.%i", &day, &month, &year);
-        dset = true;
+        if( sscanf(optarg, "%i.%i.%i", &day, &month, &year) != 3 )
+        {
+          if( sscanf(optarg, "%i/%i", &month, &year) != 2 )
+            exit(1);
+          else
+            dset = DateWithoutDaySet;
+        } else
+        {
+          dset = DateSet;
+        }
         break;
       case 'b':
         sscanf(optarg, "%i:%i", &beginsHour, &beginsMinute);
@@ -46,7 +57,7 @@ int main(int argc, char*argv[])
   time(&now_epoch);
   struct tm *now = localtime(&now_epoch);
   sqlite3 *db_handler;
-  sqlite3_open(DATABASE_FILE, &db_handler);
+  sqlite3_open(db_file, &db_handler);
   if( mode != CheckinNoMode )
   {
     if( mode == CheckinListing )
