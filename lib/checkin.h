@@ -8,8 +8,8 @@
 
 struct Timeslot* read_entries(sqlite3 *handle, int *counter, char *request);
 void create_table(sqlite3 *handle);
-void checkin_list(sqlite3 *handle, struct tm *now);
-void checkin_status(sqlite3 *handle, struct tm *now);
+void checkin_list(sqlite3 *handle, struct tm *now, int *overrideYear, int *overrideMonth);
+void checkin_status(sqlite3 *handle, struct tm *now, int *overrideYear, int *overrideMonth);
 void checkin_add(sqlite3 *handle, struct tm *begins, struct tm *ends);
 
 enum CheckinModes {

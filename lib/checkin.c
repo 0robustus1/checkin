@@ -50,9 +50,9 @@ int main(int argc, char*argv[])
   if( mode != CheckinNoMode )
   {
     if( mode == CheckinListing )
-      checkin_list(db_handler, now);
+      checkin_list(db_handler, now, (dset) ? &year : NULL, (dset) ? &month : NULL);
     else if( mode == CheckinStatus )
-      checkin_status(db_handler, now);
+      checkin_status(db_handler, now, (dset) ? &year : NULL, (dset) ? &month : NULL);
     sqlite3_close(db_handler);
     return 0;
   }
@@ -110,12 +110,22 @@ void checkin_add(sqlite3 *handle, struct tm *begins, struct tm *ends)
   }
 }
 
-void checkin_list(sqlite3 *handle, struct tm *now)
+void checkin_list(sqlite3 *handle, struct tm *now, int *overrideYear, int *overrideMonth)
 {
   int entries = 0;
   struct Timeslot *timeslots;
   char *request = (char *) malloc( 81 * sizeof(char) );
-  strftime(request, 81, "SELECT * FROM timeslots WHERE ends LIKE \"%Y-%m%%\";", now);
+  if( overrideYear && overrideMonth )
+  {
+    struct tm tmp = {
+      .tm_year = *overrideYear-1900,
+      .tm_mon  = *overrideMonth-1
+    };
+    strftime(request, 81, "SELECT * FROM timeslots WHERE ends LIKE \"%Y-%m%%\";", &tmp);
+  } else
+  {
+    strftime(request, 81, "SELECT * FROM timeslots WHERE ends LIKE \"%Y-%m%%\";", now);
+  }
   timeslots = read_entries(handle, &entries, request);
   free(request);
   if (timeslots == NULL) 
@@ -128,13 +138,23 @@ void checkin_list(sqlite3 *handle, struct tm *now)
   free(timeslots);
 }
 
-void checkin_status(sqlite3 *handle, struct tm *now)
+void checkin_status(sqlite3 *handle, struct tm *now, int *overrideYear, int *overrideMonth)
 {
   int entries = 0;
   int i;
   struct Timeslot *timeslots;
   char *request = (char *) malloc( 81 * sizeof(char) );
-  strftime(request, 81, "SELECT * FROM timeslots WHERE ends LIKE \"%Y-%m%%\";", now);
+  if( overrideYear && overrideMonth )
+  {
+    struct tm tmp = {
+      .tm_year = *overrideYear-1900,
+      .tm_mon  = *overrideMonth-1
+    };
+    strftime(request, 81, "SELECT * FROM timeslots WHERE ends LIKE \"%Y-%m%%\";", &tmp);
+  } else
+  {
+    strftime(request, 81, "SELECT * FROM timeslots WHERE ends LIKE \"%Y-%m%%\";", now);
+  }
   timeslots = read_entries(handle, &entries, request);
   char *output = request;
   strftime(output, 81, "Status for month: %m/%Y\n\n",now);
