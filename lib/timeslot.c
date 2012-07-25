@@ -78,7 +78,7 @@ void print_month(struct Timeslot *timeslots, int ts_count, int year, int month)
   {
     char *prefix = malloc( 15 * sizeof(char));
     strftime(prefix, 15, "%a, %d.%m ## ", &run_day);
-    printf("%s\t%.2dh %.2dm ###\n",prefix,*(worked_days_in_minutes + i)/60, *(worked_days_in_minutes + i)%60);
+    printf("%s\t%.2dh %.2dm ###\n",prefix, *(worked_days_in_minutes + i)/60, *(worked_days_in_minutes + i)%60);
     weeks_time += *(worked_days_in_minutes + i);
     if( run_day.tm_wday == 0 ) 
     {
@@ -91,6 +91,7 @@ void print_month(struct Timeslot *timeslots, int ts_count, int year, int month)
     run_day.tm_mday += 1;
     mktime(&run_day);
   }
+  total += weeks_time;
   printf("###########################\n");
   printf("####### Total: %.3dh %.2dm ###\n", total/60, total%60);
   printf("###########################\n");

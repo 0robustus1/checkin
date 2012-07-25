@@ -126,6 +126,7 @@ void checkin_list(sqlite3 *handle, struct tm *now, int *overrideYear, int *overr
   int entries = 0;
   struct Timeslot *timeslots;
   char *request = (char *) malloc( 81 * sizeof(char) );
+  struct tm *usedTime;
   if( overrideYear && overrideMonth )
   {
     struct tm tmp = {
@@ -133,9 +134,11 @@ void checkin_list(sqlite3 *handle, struct tm *now, int *overrideYear, int *overr
       .tm_mon  = *overrideMonth-1
     };
     strftime(request, 81, "SELECT * FROM timeslots WHERE ends LIKE \"%Y-%m%%\";", &tmp);
+    usedTime = &tmp;
   } else
   {
     strftime(request, 81, "SELECT * FROM timeslots WHERE ends LIKE \"%Y-%m%%\";", now);
+    usedTime = now;
   }
   timeslots = read_entries(handle, &entries, request);
   free(request);
@@ -145,7 +148,7 @@ void checkin_list(sqlite3 *handle, struct tm *now, int *overrideYear, int *overr
     exit(1);
   }
   
-  print_month(timeslots, entries, now->tm_year, now->tm_mon);
+  print_month(timeslots, entries, usedTime->tm_year, usedTime->tm_mon);
   free(timeslots);
 }
 
@@ -212,8 +215,8 @@ struct Timeslot* read_entries(sqlite3 *handle, int *counter, char *request)
     begins.tm_sec = 0;
     begins.tm_sec = 0;
     /*Normalize the values.*/
-    mktime(&begins);
-    mktime(&ends);
+    /*mktime(&begins);*/
+    /*mktime(&ends);*/
     struct Timeslot timeslot = {
       .id = currentId,
       .begins = begins,
