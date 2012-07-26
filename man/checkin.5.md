@@ -1,4 +1,4 @@
-CHECKIN 1 "JULY 2012" "Manpages"
+CHECKIN 5 "JULY 2012" "Manpages"
 =======================================
 
 NAME
@@ -10,6 +10,7 @@ SYNOPSIS
 --------
 
 *~/.config/checkin/checkin.cfg*
+
 *~/.checkinrc* - not yet supported
 
 DESCRIPTION
@@ -36,17 +37,42 @@ fill his or her timecard. For example the contract number. These
 contract-specific settings are in effect whenever we work on
 timeslots which belong to a contract (determined by time-period).
 
-### Independent Settings
+Now to the syntax of the configuration file.
+A normal setting would be set by a line like this:
+
+`key = value`. 
+
+`[contract]` starts a new contract entry.
+
+`;` is the comment-character.
+
+### independent Settings
+
+`verbose` - true/false (*false*) - corresponds to the `-v`-switch.
+  
 
 ### contract-specific Settings
+
+`starts` - "DD.MM.YYYY"/"MM/YYYY", required - sets a contract start-date.
+
+`ends` - "DD.MM.YYYY"/"MM/YYYY", required - sets a contract end-date.
+
+`contract` - text, optional - sets an identification for this contract (perhaps a transactionnumber)
+
+`description` - text, optional - an optional description which has no impact on programbehaviour.
+
 
 FILES
 -----
 
 *~/.config/checkin/checkin.cfg*
   Per user configuration file. See checkin(5) for further details.
+
 *~/.checkinrc* 
   Alternative file - not yet supported.
+
+*~/.config/checkin/times.db*
+  User-specific timeslot database.
 
 ENVIRONMENT
 -----------
