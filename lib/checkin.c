@@ -16,16 +16,17 @@ int main(int argc, char*argv[])
   int dset = NoDateSet;
   int bset = false;
   int eset = false;
+  int verbose = DontBeVerbose;
   char * db_file = (char *) malloc( 120 * sizeof(char) );
   sprintf(db_file, "%s/%s/%s",getenv("HOME"),CONFIG_PATH,DATABASE_FILE);
-  while ((current_opt = getopt (argc, argv, "lisd:b:e:")) != -1)
+  while ((current_opt = getopt (argc, argv, "lisd:b:e:v")) != -1)
     switch(current_opt)
     {
       case 'l':
         mode = CheckinListing;
         break;
       case 'i':
-        printf("interactive mode not implemented yet...\n");
+        puts("interactive mode not implemented yet...");
         break;
       case 's':
         mode = CheckinStatus;
@@ -50,6 +51,9 @@ int main(int argc, char*argv[])
         sscanf(optarg, "%i:%i", &endsHour, &endsMinute);
         eset = true;
         break;
+      case 'v':
+        verbose = BeVerbose;
+        break;
       default:
         abort ();
     }
@@ -60,44 +64,56 @@ int main(int argc, char*argv[])
   sqlite3_open(db_file, &db_handler);
   if( mode != CheckinNoMode )
   {
+    if( verbose && dset==DateSet )
+        puts("Date set, ignoring day-value...");
     if( mode == CheckinListing )
       checkin_list(db_handler, now, (dset) ? &year : NULL, (dset) ? &month : NULL);
     else if( mode == CheckinStatus )
       checkin_status(db_handler, now, (dset) ? &year : NULL, (dset) ? &month : NULL);
     sqlite3_close(db_handler);
     return 0;
-  }
-  /*int i;*/
-  /*for(i=0;i<entries;i++)*/
-    /*show_timeslot(timeslots + (i*sizeof(struct Timeslot)));*/
-  if( !(bset && eset) )
-    return 1;
-  if( !dset )
+  } else
   {
-    year = now->tm_year+1900;
-    month = now->tm_mon+1;
-    day = now->tm_mday;
+    if( !(bset && eset) )
+    {
+      if( verbose )
+        puts("Just one of {-b,-e} set, you need to set both...");
+      return 1;
+    }
+    if( dset==DateWithoutDaySet )
+    {
+      if( verbose )
+        puts("You need to use the DD.MM.YYY format when adding...");
+      return 1;
+    }
+    if( !dset )
+    {
+      if( verbose )
+        puts("No date set, using todays date...");
+      year = now->tm_year+1900;
+      month = now->tm_mon+1;
+      day = now->tm_mday;
+    }
+    struct tm begins = {
+      .tm_year  = year-1900,
+      .tm_mon   = month-1,
+      .tm_mday  = day,
+      .tm_hour  = beginsHour-1,
+      .tm_min   = beginsMinute
+    };
+    struct tm ends = {
+      .tm_year  = year-1900,
+      .tm_mon   = month-1,
+      .tm_mday  = day,
+      .tm_hour  = endsHour-1,
+      .tm_min   = endsMinute
+    };
+    mktime(&begins);
+    mktime(&ends);
+    checkin_add(db_handler, &begins, &ends);
+    sqlite3_close(db_handler);
+    return 0;
   }
-  struct tm begins = {
-    .tm_year  = year-1900,
-    .tm_mon   = month-1,
-    .tm_mday  = day,
-    .tm_hour  = beginsHour-1,
-    .tm_min   = beginsMinute
-  };
-  struct tm ends = {
-    .tm_year  = year-1900,
-    .tm_mon   = month-1,
-    .tm_mday  = day,
-    .tm_hour  = endsHour-1,
-    .tm_min   = endsMinute
-  };
-  mktime(&begins);
-  mktime(&ends);
-  checkin_add(db_handler, &begins, &ends);
-  sqlite3_close(db_handler);
-  return 0;
-
 }
 
 void checkin_add(sqlite3 *handle, struct tm *begins, struct tm *ends)

@@ -18,3 +18,6 @@ enum CheckinModes {
 enum CheckinDateModes {
   NoDateSet, DateSet, DateWithoutDaySet
 };
+enum CheckinVerbosity {
+  DontBeVerbose, BeVerbose
+};
