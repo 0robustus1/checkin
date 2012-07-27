@@ -1,4 +1,9 @@
 require 'fileutils'
+require 'rake/clean'
+
+CLEAN.include('bin/*.o')
+CLOBBER.include('bin/checkin')
+
 $flags = %w{-g}
 $lflags = %w{-lsqlite3}
 desc "build checkin..."
