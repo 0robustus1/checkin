@@ -2,7 +2,7 @@
 #include <unistd.h>
 
 const char * DATABASE_FILE = "times.db";
-const char * CONFIG_PATH   = ".config/checkin/";
+const char * CONFIG_PATH   = ".config/checkin";
 const char * TIME_FORMAT   = "%Y-%m-%d %H:%M:00";
 const int true = 1;
 const int false = 0;
@@ -19,6 +19,7 @@ int main(int argc, char*argv[])
   int verbose = DontBeVerbose;
   char * db_file = (char *) malloc( 120 * sizeof(char) );
   sprintf(db_file, "%s/%s/%s",getenv("HOME"),CONFIG_PATH,DATABASE_FILE);
+  puts(db_file);
   while ((current_opt = getopt (argc, argv, "lisd:b:e:v")) != -1)
     switch(current_opt)
     {
@@ -34,10 +35,16 @@ int main(int argc, char*argv[])
       case 'd':
         if( sscanf(optarg, "%i.%i.%i", &day, &month, &year) != 3 )
         {
-          if( sscanf(optarg, "%i/%i", &month, &year) != 2 )
-            exit(1);
-          else
-            dset = DateWithoutDaySet;
+          if( sscanf(optarg, "%i.0%i.%i", &day, &month, &year) != 3 )
+          {
+            if( sscanf(optarg, "%i/%i", &month, &year) != 2 ) 
+            {
+              puts("-d switch used in the wrong way...");
+              exit(1);
+            }
+            else
+              dset = DateWithoutDaySet;
+          }
         } else
         {
           dset = DateSet;
@@ -128,13 +135,15 @@ void checkin_add(sqlite3 *handle, struct tm *begins, struct tm *ends)
           beginsString,
           endsString
          );
+  puts(request);
   sqlite3_stmt *stmt;
   sqlite3_prepare(handle, request, -1, &stmt, NULL);
-  if( sqlite3_step(stmt) == -1 )
+  if( sqlite3_step(stmt) != SQLITE_DONE )
   {
     printf("Problem encountered while trying to save...\n");
     exit(1);
   }
+  sqlite3_finalize(stmt);
 }
 
 void checkin_list(sqlite3 *handle, struct tm *now, int *overrideYear, int *overrideMonth)
@@ -157,13 +166,13 @@ void checkin_list(sqlite3 *handle, struct tm *now, int *overrideYear, int *overr
     usedTime = now;
   }
   timeslots = read_entries(handle, &entries, request);
-  free(request);
   if (timeslots == NULL) 
   {
-    printf("Problem while parsing...");
-    exit(1);
+    puts(request);
+    puts("Problem while parsing...");
+    /*exit(1);*/
   }
-  
+  free(request);
   print_month(timeslots, entries, usedTime->tm_year, usedTime->tm_mon);
   free(timeslots);
 }
