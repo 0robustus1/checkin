@@ -39,7 +39,8 @@ int main(int argc, char*argv[])
           {
             if( sscanf(optarg, "%i/%i", &month, &year) != 2 ) 
             {
-              puts("-d switch used in the wrong way...");
+              if( verbose )
+                puts("-d switch used in the wrong way...");
               exit(1);
             }
             else
@@ -136,7 +137,7 @@ void checkin_add(sqlite3 *handle, struct tm *begins, struct tm *ends)
           beginsString,
           endsString
          );
-  puts(request);
+  /*puts(request);*/
   sqlite3_stmt *stmt;
   sqlite3_prepare(handle, request, -1, &stmt, NULL);
   if( sqlite3_step(stmt) != SQLITE_DONE )
@@ -169,8 +170,8 @@ void checkin_list(sqlite3 *handle, struct tm *now, int *overrideYear, int *overr
   timeslots = read_entries(handle, &entries, request);
   if (timeslots == NULL) 
   {
-    puts(request);
-    puts("Problem while parsing...");
+    /*puts(request);*/
+    /*puts("Problem while parsing...");*/
     /*exit(1);*/
   }
   free(request);
