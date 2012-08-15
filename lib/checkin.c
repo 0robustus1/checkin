@@ -45,10 +45,11 @@ int main(int argc, char*argv[])
             else
               dset = DateWithoutDaySet;
           }
-        } else
-        {
-          dset = DateSet;
+          else
+            dset = DateSet;
         }
+        else
+          dset = DateSet;
         break;
       case 'b':
         sscanf(optarg, "%i:%i", &beginsHour, &beginsMinute);
