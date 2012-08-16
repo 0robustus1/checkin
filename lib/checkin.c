@@ -202,7 +202,7 @@ void checkin_status(sqlite3 *handle, struct tm *now, int *overrideYear, int *ove
   timeslots = read_entries(handle, &entries, request);
   char *output = request;
   strftime(output, 81, "Status for month: %m/%Y\n\n",usedTime);
-  printf(output);
+  printf("%s",output);
   int time_sum = 0;
   int hours = 0;
   int minutes = 0;
@@ -233,8 +233,8 @@ struct Timeslot* read_entries(sqlite3 *handle, int *counter, char *request)
     if (*counter>0)
       timeslots = (struct Timeslot*) realloc(timeslots, (*counter+1) * step);
     int currentId = sqlite3_column_int(stmt, 0);
-    const unsigned char *beginsRaw = sqlite3_column_text(stmt, 1);
-    const unsigned char *endsRaw = sqlite3_column_text(stmt, 2);
+    const char *beginsRaw = (const char *) sqlite3_column_text(stmt, 1);
+    const char *endsRaw = (const char *) sqlite3_column_text(stmt, 2);
     struct tm begins;
     struct tm ends; 
     if (strptime(beginsRaw, TIME_FORMAT , &begins) == 0)

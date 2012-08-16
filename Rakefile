@@ -4,17 +4,20 @@ require 'rake/clean'
 CLEAN.include('bin/*.o')
 CLOBBER.include('bin/checkin')
 
-$flags = %w{-g}
+$GCC = "gcc-mp-4.7"
+$flags = %w{-g -Wall}
 $lflags = %w{-lsqlite3}
+directory "bin"
+directory "man"
 desc "build checkin..."
-task :default => 'bin/checkin'
+task :default => %w{bin bin/checkin}
 
 file 'bin/checkin' => %w{lib/checkin.c lib/checkin.h bin/timeslot.o} do |t|
-  sh "gcc #{$lflags.join(' ')} #{$flags.join(' ')} -o #{t.name} #{t.prerequisites.join(' ')}"
+  sh "#{$GCC} #{$lflags.join(' ')} #{$flags.join(' ')} -o #{t.name} #{t.prerequisites.join(' ')}"
 end
 
 file 'bin/timeslot.o' => %w{lib/timeslot.c lib/timeslot.h} do |t|
-  sh "gcc #{$flags.join(' ')} -c -o #{t.name} #{t. prerequisites.first}"
+  sh "#{$GCC} #{$flags.join(' ')} -c -o #{t.name} #{t. prerequisites.first}"
 end
 
 desc "compile manpages..."
