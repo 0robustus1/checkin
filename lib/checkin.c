@@ -32,21 +32,16 @@ int main(int argc, char*argv[])
         mode = CheckinStatus;
         break;
       case 'd':
-        if( sscanf(optarg, "%i.%i.%i", &day, &month, &year) != 3 )
+        if( sscanf(optarg, "%d.%d.%d", &day, &month, &year) != 3 )
         {
-          if( sscanf(optarg, "%i.0%i.%i", &day, &month, &year) != 3 )
+          if( sscanf(optarg, "%i/%i", &month, &year) != 2 ) 
           {
-            if( sscanf(optarg, "%i/%i", &month, &year) != 2 ) 
-            {
-              if( verbose )
-                puts("-d switch used in the wrong way...");
-              exit(1);
-            }
-            else
-              dset = DateWithoutDaySet;
+            if( verbose )
+              puts("-d switch used in the wrong way...");
+            exit(1);
           }
           else
-            dset = DateSet;
+            dset = DateWithoutDaySet;
         }
         else
           dset = DateSet;
