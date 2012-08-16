@@ -19,7 +19,6 @@ int main(int argc, char*argv[])
   int verbose = DontBeVerbose;
   char * db_file = (char *) malloc( 120 * sizeof(char) );
   sprintf(db_file, "%s/%s/%s",getenv("HOME"),CONFIG_PATH,DATABASE_FILE);
-  puts(db_file);
   while ((current_opt = getopt (argc, argv, "lisd:b:e:v")) != -1)
     switch(current_opt)
     {
