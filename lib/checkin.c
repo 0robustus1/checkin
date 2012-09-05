@@ -34,7 +34,7 @@ int main(int argc, char*argv[])
       case 'd':
         if( sscanf(optarg, "%d.%d.%d", &day, &month, &year) != 3 )
         {
-          if( sscanf(optarg, "%i/%i", &month, &year) != 2 ) 
+          if( sscanf(optarg, "%d/%d", &month, &year) != 2 ) 
           {
             if( verbose )
               puts("-d switch used in the wrong way...");
