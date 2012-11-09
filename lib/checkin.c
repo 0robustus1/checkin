@@ -47,11 +47,11 @@ int main(int argc, char*argv[])
           dset = DateSet;
         break;
       case 'b':
-        sscanf(optarg, "%i:%i", &beginsHour, &beginsMinute);
+        sscanf(optarg, "%d:%d", &beginsHour, &beginsMinute);
         bset = true;
         break;
       case 'e':
-        sscanf(optarg, "%i:%i", &endsHour, &endsMinute);
+        sscanf(optarg, "%d:%d", &endsHour, &endsMinute);
         eset = true;
         break;
       case 'v':
