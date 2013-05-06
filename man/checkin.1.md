@@ -76,10 +76,10 @@ ENVIRONMENT
 AUTHOR
 ------
 
-Tim Reddehase <robustus@rightsrestricted.de>
+Tim Reddehase <robustus@rightsrestricted.com>
 
 SEE ALSO
 --------
 
 checkin(5), [checkin page](
-http://rightsrestricted.de/software/checkin)
+http://rightsrestricted.com)

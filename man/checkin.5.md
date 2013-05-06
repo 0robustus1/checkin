@@ -84,10 +84,10 @@ A list of those variables will soon be available.
 AUTHOR
 ------
 
-Tim Reddehase <robustus@rightsrestricted.de>
+Tim Reddehase <robustus@rightsrestricted.com>
 
 SEE ALSO
 --------
 
 checkin(1), [checkin page](
-http://rightsrestricted.de/software/checkin)
+http://rightsrestricted.com)
