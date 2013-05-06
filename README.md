@@ -60,6 +60,13 @@ by hours for each day.
 - `-v`  
   Be more verbose...!
 
+## Things to be done
+
+- use a packaging system (like autotools)
+- adding useful notes to timeslots
+- editor-integration (like git-commit)
+- other small gadgets to make living easier ;)
+
 
 ## License
 
