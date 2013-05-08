@@ -17,11 +17,11 @@ You can checkin so called **timeslots** to represent
 given work hours. You can also list your worked time in a month
 by hours for each day. 
 
-`checkin -l [-f `*config-file*` ] [-d `**date**`]`
+<code> checkin -l [-f <em>config-file</em>] [-d <strong>date</strong>]</code>
 
-`checkin -s [-f `*config-file*` ] [-d `**date**`]`
+<code> checkin -s [-f <em>config-file</em>] [-d <strong>date</strong>]</code>
 
-`checkin [-d `**date**`] -b `**time**` -e `**time**
+<code> checkin [-d <strong>date</strong>] -b <strong>time</strong> -e <strong>time</time></code>
 
 - `-b` **time**  
   Defines the given **time** as the starttime of a timeslot.
