@@ -65,6 +65,8 @@ by hours for each day.
 - use a packaging system (like autotools)
 - adding useful notes to timeslots
 - editor-integration (like git-commit)
+  - especially jumping to `$EDITOR` when commiting to a timeslot  
+    (for the description)
 - other small gadgets to make living easier ;)
 
 
@@ -96,4 +98,4 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 [mit]: http://opensource.org/licenses/MIT
-[1]: http://rightsrestricted.com
+[1]: https://rightsrestricted.com
