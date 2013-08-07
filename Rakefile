@@ -4,7 +4,7 @@ require 'rake/clean'
 CLEAN.include('bin/*.o')
 CLOBBER.include('bin/checkin')
 
-$GCC = "gcc-mp-4.7"
+$GCC = "gcc"
 $flags = %w{-g -Wall}
 $lflags = %w{-lsqlite3}
 directory "bin"
@@ -27,7 +27,7 @@ Dir.glob("man/*.*.md").map{|f| f.sub(/md$/,'gz')}.each do |f|
   md_file = f.sub(/gz$/,'md')
   file f => md_file do 
     manpage_file = f.sub(/\.gz$/,'')
-    sh "md2man #{md_file} > #{manpage_file}"
+    sh "md2man-roff #{md_file} > #{manpage_file}"
     sh "gzip --force #{manpage_file}"
   end
 end
