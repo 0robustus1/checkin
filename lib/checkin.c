@@ -235,14 +235,14 @@ void checkin_status(sqlite3 *handle, struct tm *now, int *overrideYear, int *ove
 struct Timeslot* read_entries(sqlite3 *handle, int *counter, char *request)
 {
   sqlite3_stmt *stmt;
-	
-	sqlite3_prepare(handle, request, -1, &stmt, NULL);
-	
+
+  sqlite3_prepare(handle, request, -1, &stmt, NULL);
+
   int step = sizeof(struct Timeslot);
   *counter = 0;
   struct Timeslot *timeslots = (struct Timeslot*) malloc(1 * step);
-	while(sqlite3_step(stmt) != SQLITE_DONE)
-	{
+  while(sqlite3_step(stmt) != SQLITE_DONE)
+  {
     if (*counter>0)
       timeslots = (struct Timeslot*) realloc(timeslots, (*counter+1) * step);
     int currentId = sqlite3_column_int(stmt, 0);
@@ -267,20 +267,20 @@ struct Timeslot* read_entries(sqlite3 *handle, int *counter, char *request)
     };
     *(timeslots + (*counter)) = timeslot; 
     *counter+=1;
-	}
+  }
   if (*counter==0)
   {
     free(timeslots);
     timeslots = NULL;
   }
-	sqlite3_finalize(stmt);
+  sqlite3_finalize(stmt);
   return timeslots;
 }
 
 
 void create_table(sqlite3 *handle)
 {
-	sqlite3_exec(handle, "CREATE TABLE timeslots (id integer primary key autoincrement, begins text, ends text);", NULL, NULL, NULL);
+  sqlite3_exec(handle, "CREATE TABLE timeslots (id integer primary key autoincrement, begins text, ends text);", NULL, NULL, NULL);
 }
 
 
