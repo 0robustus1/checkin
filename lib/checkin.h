@@ -11,6 +11,7 @@ void create_table(sqlite3 *handle);
 void checkin_list(sqlite3 *handle, struct tm *now, int *overrideYear, int *overrideMonth);
 void checkin_status(sqlite3 *handle, struct tm *now, int *overrideYear, int *overrideMonth);
 void checkin_add(sqlite3 *handle, struct tm *begins, struct tm *ends);
+void handle_options(char *keyword, int argc, char **argv);
 
 enum CheckinModes {
   CheckinNoMode, CheckinListing, CheckinStatus

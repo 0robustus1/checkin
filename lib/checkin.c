@@ -6,10 +6,29 @@ const char * CONFIG_PATH   = ".config/checkin";
 const char * TIME_FORMAT   = "%Y-%m-%d %H:%M:00";
 const int true = 1;
 const int false = 0;
-int main(int argc, char*argv[])
+
+int main(int argc, char *argv[])
 {
   if( argc == 1 )
-    printf("no option specified...\n");
+    printf("no option or keyword specified...\n");
+  else if( argc > 1)
+  {
+    char *keyword = NULL;
+    int arg_c = argc;
+    char **arg_v = argv;
+    if( argv[1][0] != '-') /* not an option */
+    {
+      keyword = argv[1];
+      arg_c -= 1;
+      arg_v = argv+1;
+    }
+    handle_options(keyword, arg_c, arg_v);
+  }
+  return 0;
+}
+
+void handle_options(char *keyword, int argc, char **argv)
+{
   int current_opt;
   int mode = CheckinNoMode;
   int day, month, year, beginsHour, beginsMinute, endsHour, endsMinute;
@@ -74,20 +93,20 @@ int main(int argc, char*argv[])
     else if( mode == CheckinStatus )
       checkin_status(db_handler, now, (dset) ? &year : NULL, (dset) ? &month : NULL);
     sqlite3_close(db_handler);
-    return 0;
+    exit(0);
   } else
   {
     if( !(bset && eset) )
     {
       if( verbose )
         puts("Just one of {-b,-e} set, you need to set both...");
-      return 1;
+      exit(1);
     }
     if( dset==DateWithoutDaySet )
     {
       if( verbose )
         puts("You need to use the DD.MM.YYY format when adding...");
-      return 1;
+      exit(1);
     }
     if( !dset )
     {
@@ -115,7 +134,7 @@ int main(int argc, char*argv[])
     mktime(&ends);
     checkin_add(db_handler, &begins, &ends);
     sqlite3_close(db_handler);
-    return 0;
+    exit(0);
   }
 }
 
