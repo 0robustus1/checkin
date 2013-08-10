@@ -38,14 +38,11 @@ void handle_options(char *keyword, int argc, char **argv)
   int verbose = DontBeVerbose;
   char * db_file = (char *) malloc( 120 * sizeof(char) );
   sprintf(db_file, "%s/%s/%s",getenv("HOME"),CONFIG_PATH,DATABASE_FILE);
-  while ((current_opt = getopt (argc, argv, "lisd:b:e:v")) != -1)
+  while ((current_opt = getopt (argc, argv, "lsd:b:e:v")) != -1)
     switch(current_opt)
     {
       case 'l':
         mode = CheckinListing;
-        break;
-      case 'i':
-        puts("interactive mode not implemented yet...");
         break;
       case 's':
         mode = CheckinStatus;
