@@ -7,8 +7,16 @@ const char * TIME_FORMAT   = "%Y-%m-%d %H:%M:00";
 const int true = 1;
 const int false = 0;
 
+sqlite3 *db_handler;
+int *db_open;
+void initialize_database_connection();
+void kill_database_connection();
+
 int main(int argc, char *argv[])
 {
+  db_open = malloc( sizeof(int) );
+  *db_open = false;
+
   if( argc == 1 )
     printf("no option or keyword specified...\n");
   else if( argc > 1)
@@ -22,9 +30,27 @@ int main(int argc, char *argv[])
       arg_c -= 1;
       arg_v = argv+1;
     }
+    initialize_database_connection();
     handle_options(keyword, arg_c, arg_v);
   }
+  kill_database_connection();
+  free(db_open);
   return 0;
+}
+
+void initialize_database_connection()
+{
+  char * db_file = (char *) malloc( 120 * sizeof(char) );
+  sprintf(db_file, "%s/%s/%s",getenv("HOME"),CONFIG_PATH,DATABASE_FILE);
+  sqlite3_open(db_file, &db_handler);
+  *db_open = true;
+  free(db_file);
+}
+
+void kill_database_connection()
+{
+  if( *db_open )
+    sqlite3_close(db_handler);
 }
 
 void handle_options(char *keyword, int argc, char **argv)
@@ -36,8 +62,6 @@ void handle_options(char *keyword, int argc, char **argv)
   int bset = false;
   int eset = false;
   int verbose = DontBeVerbose;
-  char * db_file = (char *) malloc( 120 * sizeof(char) );
-  sprintf(db_file, "%s/%s/%s",getenv("HOME"),CONFIG_PATH,DATABASE_FILE);
   while ((current_opt = getopt (argc, argv, "lsd:b:e:v")) != -1)
     switch(current_opt)
     {
@@ -79,8 +103,6 @@ void handle_options(char *keyword, int argc, char **argv)
   time_t now_epoch;
   time(&now_epoch);
   struct tm *now = localtime(&now_epoch);
-  sqlite3 *db_handler;
-  sqlite3_open(db_file, &db_handler);
   if( mode != CheckinNoMode )
   {
     if( verbose && dset==DateSet )
@@ -89,7 +111,7 @@ void handle_options(char *keyword, int argc, char **argv)
       checkin_list(db_handler, now, (dset) ? &year : NULL, (dset) ? &month : NULL);
     else if( mode == CheckinStatus )
       checkin_status(db_handler, now, (dset) ? &year : NULL, (dset) ? &month : NULL);
-    sqlite3_close(db_handler);
+    kill_database_connection();
     exit(0);
   } else
   {
@@ -130,7 +152,6 @@ void handle_options(char *keyword, int argc, char **argv)
     mktime(&begins);
     mktime(&ends);
     checkin_add(db_handler, &begins, &ends);
-    sqlite3_close(db_handler);
     exit(0);
   }
 }
