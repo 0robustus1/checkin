@@ -92,6 +92,12 @@ void checkin_terminate(int exit_state)
   exit(exit_state);
 }
 
+void out(char *output)
+{
+  if( *verbose )
+    puts(output);
+}
+
 void handle_options(char *keyword, int argc, char **argv)
 {
   int current_opt;
@@ -110,8 +116,7 @@ void handle_options(char *keyword, int argc, char **argv)
         {
           if( sscanf(optarg, "%d/%d", &month, &year) != 2 ) 
           {
-            if( *verbose )
-              puts("-d switch used in the wrong way...");
+            out("-d switch used in the wrong way...");
             checkin_terminate(1);
           }
           else
@@ -139,8 +144,8 @@ void handle_options(char *keyword, int argc, char **argv)
   struct tm *now = localtime(&now_epoch);
   if( *mode != CheckinNoMode )
   {
-    if( *verbose && *d_opt_set==DateSet )
-        puts("Date set, ignoring day-value...");
+    if( *d_opt_set==DateSet )
+      out("Date set, ignoring day-value...");
     if( *mode == CheckinListing )
       checkin_list(db_handler, now, (*d_opt_set) ? &year : NULL, (*d_opt_set) ? &month : NULL);
     else if( *mode == CheckinStatus )
@@ -151,20 +156,17 @@ void handle_options(char *keyword, int argc, char **argv)
   {
     if( !(*b_opt_set && *e_opt_set) )
     {
-      if( *verbose )
-        puts("Just one of {-b,-e} set, you need to set both...");
+      out("Just one of {-b,-e} set, you need to set both...");
       checkin_terminate(1);
     }
     if( *d_opt_set==DateWithoutDaySet )
     {
-      if( *verbose )
-        puts("You need to use the DD.MM.YYY format when adding...");
+      out("You need to use the DD.MM.YYY format when adding...");
       checkin_terminate(1);
     }
     if( !*d_opt_set )
     {
-      if( *verbose )
-        puts("No date set, using todays date...");
+      out("No date set, using todays date...");
       year = now->tm_year+1900;
       month = now->tm_mon+1;
       day = now->tm_mday;
