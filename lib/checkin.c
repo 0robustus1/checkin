@@ -4,6 +4,7 @@
 const char * DATABASE_FILE = "times.db";
 const char * CONFIG_PATH   = ".config/checkin";
 const char * TIME_FORMAT   = "%Y-%m-%d %H:%M:00";
+
 const int true = 1;
 const int false = 0;
 
@@ -12,11 +13,14 @@ int *db_open;
 void initialize_database_connection();
 void kill_database_connection();
 
+void checkin_initialize();
+void checkin_terminate(int exit_state);
+int *mode, *verbose, *b_opt_set, *d_opt_set, *e_opt_set;
+
+
 int main(int argc, char *argv[])
 {
-  db_open = malloc( sizeof(int) );
-  *db_open = false;
-
+  checkin_initialize();
   if( argc == 1 )
     printf("no option or keyword specified...\n");
   else if( argc > 1)
@@ -33,8 +37,7 @@ int main(int argc, char *argv[])
     initialize_database_connection();
     handle_options(keyword, arg_c, arg_v);
   }
-  kill_database_connection();
-  free(db_open);
+  checkin_terminate(0);
   return 0;
 }
 
@@ -53,49 +56,80 @@ void kill_database_connection()
     sqlite3_close(db_handler);
 }
 
+void checkin_initialize()
+{
+  db_open = malloc( sizeof(int) );
+  *db_open = false;
+
+  mode = malloc( sizeof(int) );
+  *mode = CheckinNoMode;
+
+  verbose = malloc( sizeof(int) );
+  *verbose = DontBeVerbose;
+
+
+  b_opt_set = malloc( sizeof(int) );
+  *b_opt_set = false;
+
+  d_opt_set = malloc( sizeof(int) );
+  *d_opt_set = NoDateSet;
+
+  e_opt_set = malloc( sizeof(int) );
+  *e_opt_set = false;
+}
+
+void checkin_terminate(int exit_state)
+{
+  kill_database_connection();
+
+  free(db_open);
+  free(mode);
+  free(verbose);
+  free(b_opt_set);
+  free(d_opt_set);
+  free(e_opt_set);
+
+  exit(exit_state);
+}
+
 void handle_options(char *keyword, int argc, char **argv)
 {
   int current_opt;
-  int mode = CheckinNoMode;
   int day, month, year, beginsHour, beginsMinute, endsHour, endsMinute;
-  int dset = NoDateSet;
-  int bset = false;
-  int eset = false;
-  int verbose = DontBeVerbose;
   while ((current_opt = getopt (argc, argv, "lsd:b:e:v")) != -1)
     switch(current_opt)
     {
       case 'l':
-        mode = CheckinListing;
+        *mode = CheckinListing;
         break;
       case 's':
-        mode = CheckinStatus;
+        *mode = CheckinStatus;
         break;
       case 'd':
         if( sscanf(optarg, "%d.%d.%d", &day, &month, &year) != 3 )
         {
           if( sscanf(optarg, "%d/%d", &month, &year) != 2 ) 
           {
-            if( verbose )
+            if( *verbose )
               puts("-d switch used in the wrong way...");
-            exit(1);
+            checkin_terminate(1);
           }
           else
-            dset = DateWithoutDaySet;
+            *d_opt_set = DateWithoutDaySet;
         }
         else
-          dset = DateSet;
+          *d_opt_set = DateSet;
         break;
       case 'b':
         sscanf(optarg, "%d:%d", &beginsHour, &beginsMinute);
-        bset = true;
+        *b_opt_set = true;
         break;
       case 'e':
         sscanf(optarg, "%d:%d", &endsHour, &endsMinute);
-        eset = true;
+        *e_opt_set = true;
         break;
       case 'v':
-        verbose = BeVerbose;
+        *verbose = BeVerbose;
         break;
       default:
         abort ();
@@ -103,33 +137,33 @@ void handle_options(char *keyword, int argc, char **argv)
   time_t now_epoch;
   time(&now_epoch);
   struct tm *now = localtime(&now_epoch);
-  if( mode != CheckinNoMode )
+  if( *mode != CheckinNoMode )
   {
-    if( verbose && dset==DateSet )
+    if( *verbose && *d_opt_set==DateSet )
         puts("Date set, ignoring day-value...");
-    if( mode == CheckinListing )
-      checkin_list(db_handler, now, (dset) ? &year : NULL, (dset) ? &month : NULL);
-    else if( mode == CheckinStatus )
-      checkin_status(db_handler, now, (dset) ? &year : NULL, (dset) ? &month : NULL);
+    if( *mode == CheckinListing )
+      checkin_list(db_handler, now, (*d_opt_set) ? &year : NULL, (*d_opt_set) ? &month : NULL);
+    else if( *mode == CheckinStatus )
+      checkin_status(db_handler, now, (*d_opt_set) ? &year : NULL, (*d_opt_set) ? &month : NULL);
     kill_database_connection();
-    exit(0);
+    checkin_terminate(0);
   } else
   {
-    if( !(bset && eset) )
+    if( !(*b_opt_set && *e_opt_set) )
     {
-      if( verbose )
+      if( *verbose )
         puts("Just one of {-b,-e} set, you need to set both...");
-      exit(1);
+      checkin_terminate(1);
     }
-    if( dset==DateWithoutDaySet )
+    if( *d_opt_set==DateWithoutDaySet )
     {
-      if( verbose )
+      if( *verbose )
         puts("You need to use the DD.MM.YYY format when adding...");
-      exit(1);
+      checkin_terminate(1);
     }
-    if( !dset )
+    if( !*d_opt_set )
     {
-      if( verbose )
+      if( *verbose )
         puts("No date set, using todays date...");
       year = now->tm_year+1900;
       month = now->tm_mon+1;
@@ -152,7 +186,7 @@ void handle_options(char *keyword, int argc, char **argv)
     mktime(&begins);
     mktime(&ends);
     checkin_add(db_handler, &begins, &ends);
-    exit(0);
+    checkin_terminate(0);
   }
 }
 
@@ -174,7 +208,7 @@ void checkin_add(sqlite3 *handle, struct tm *begins, struct tm *ends)
   if( sqlite3_step(stmt) != SQLITE_DONE )
   {
     printf("Problem encountered while trying to save...\n");
-    exit(1);
+    checkin_terminate(1);
   }
   sqlite3_finalize(stmt);
 }
