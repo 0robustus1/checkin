@@ -45,7 +45,6 @@ int main(int argc, char *argv[])
     handle_options(keyword, arg_c, arg_v);
   }
   checkin_terminate(0);
-  return 0;
 }
 
 void open_db_connection(char * const db_file)
