@@ -5,6 +5,9 @@
 const char * DATABASE_FILE = "times.db";
 const char * CONFIG_PATH   = ".config/checkin";
 const char * TIME_FORMAT   = "%Y-%m-%d %H:%M:00";
+const char * FETCH_MONTH_QUERY = "SELECT id,begins,ends "
+                                 "FROM timeslots "
+                                 "WHERE ends LIKE \"%Y-%m%%\";";
 
 const int true = 1;
 const int false = 0;
@@ -252,11 +255,11 @@ void checkin_list(sqlite3 *handle, struct tm *now, int *overrideYear, int *overr
       .tm_year = *overrideYear-1900,
       .tm_mon  = *overrideMonth-1
     };
-    strftime(request, 81, "SELECT * FROM timeslots WHERE ends LIKE \"%Y-%m%%\";", &tmp);
+    strftime(request, 81, FETCH_MONTH_QUERY, &tmp);
     usedTime = &tmp;
   } else
   {
-    strftime(request, 81, "SELECT * FROM timeslots WHERE ends LIKE \"%Y-%m%%\";", now);
+    strftime(request, 81, FETCH_MONTH_QUERY, now);
     usedTime = now;
   }
   timeslots = read_entries(handle, &entries, request);
@@ -284,11 +287,11 @@ void checkin_status(sqlite3 *handle, struct tm *now, int *overrideYear, int *ove
       .tm_year = *overrideYear-1900,
       .tm_mon  = *overrideMonth-1
     };
-    strftime(request, 81, "SELECT * FROM timeslots WHERE ends LIKE \"%Y-%m%%\";", &tmp);
+    strftime(request, 81, FETCH_MONTH_QUERY, &tmp);
     usedTime = &tmp;
   } else
   {
-    strftime(request, 81, "SELECT * FROM timeslots WHERE ends LIKE \"%Y-%m%%\";", now);
+    strftime(request, 81, FETCH_MONTH_QUERY, now);
     usedTime = now;
   }
   timeslots = read_entries(handle, &entries, request);
