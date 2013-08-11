@@ -1,5 +1,6 @@
 #include "checkin.h"
 #include <unistd.h>
+#include <sys/stat.h>
 
 const char * DATABASE_FILE = "times.db";
 const char * CONFIG_PATH   = ".config/checkin";
@@ -12,6 +13,9 @@ sqlite3 *db_handler;
 int *db_open;
 void initialize_database_connection();
 void kill_database_connection();
+void open_db_connection(char * const db_file);
+void close_db_connection();
+void create_table(sqlite3 *handle);
 
 void checkin_initialize();
 void checkin_terminate(int exit_state);
@@ -41,19 +45,40 @@ int main(int argc, char *argv[])
   return 0;
 }
 
+void open_db_connection(char * const db_file)
+{
+  if ( !*db_open )
+  {
+    sqlite3_open(db_file, &db_handler);
+    *db_open = true;
+  }
+}
+
+void close_db_connection()
+{
+  if( *db_open )
+  {
+    sqlite3_close(db_handler);
+    *db_open = false;
+  }
+}
+
 void initialize_database_connection()
 {
   char * db_file = (char *) malloc( 120 * sizeof(char) );
   sprintf(db_file, "%s/%s/%s",getenv("HOME"),CONFIG_PATH,DATABASE_FILE);
-  sqlite3_open(db_file, &db_handler);
-  *db_open = true;
+
+  struct stat db_file_stat;
+  if( stat(db_file, &db_file_stat) == -1 )
+    checkin_create_database(db_file);
+
+  open_db_connection(db_file);
   free(db_file);
 }
 
 void kill_database_connection()
 {
-  if( *db_open )
-    sqlite3_close(db_handler);
+  close_db_connection();
 }
 
 void checkin_initialize()
@@ -331,10 +356,25 @@ struct Timeslot* read_entries(sqlite3 *handle, int *counter, char *request)
   return timeslots;
 }
 
+void checkin_create_database(char * const db_file)
+{
+  printf("Creating database...");
+  open_db_connection(db_file);
+  create_table(db_handler);
+  close_db_connection();
+  puts("successful");
+}
 
 void create_table(sqlite3 *handle)
 {
-  sqlite3_exec(handle, "CREATE TABLE timeslots (id integer primary key autoincrement, begins text, ends text);", NULL, NULL, NULL);
+  sqlite3_exec(handle,
+    "CREATE TABLE timeslots "
+      "(id integer primary key autoincrement, "
+      "begins text, "
+      "ends text, "
+      "description text "
+      ");",
+    NULL, NULL, NULL);
 }
 
 

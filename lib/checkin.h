@@ -7,7 +7,7 @@
 #include "timeslot.h"
 
 struct Timeslot* read_entries(sqlite3 *handle, int *counter, char *request);
-void create_table(sqlite3 *handle);
+void checkin_create_database(char * const db_file);
 void checkin_list(sqlite3 *handle, struct tm *now, int *overrideYear, int *overrideMonth);
 void checkin_status(sqlite3 *handle, struct tm *now, int *overrideYear, int *overrideMonth);
 void checkin_add(sqlite3 *handle, struct tm *begins, struct tm *ends);
