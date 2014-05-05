@@ -1,0 +1,94 @@
+.Dd May 04, 2014
+.Dt CHECKIN 1
+.Os
+.
+.Sh NAME
+.Nm checkin
+.Nd checking in time your worked on something
+.
+.Sh SYNOPSIS
+.Nm
+. Fl l
+. Op Fl f Pa config-file
+. Op Fl d Ar date
+.Nm
+. Fl s
+. Op Fl f Pa config-file
+. Op Fl d Ar date
+.Nm
+. Op Fl d Ar date
+. Fl b Ar time Fl e Ar time
+.
+.Sh DESCRIPTION
+.Nm
+allows you to keep track of your worked time.
+.Pp
+You can checkin so called
+.Em timeslots
+to represent given work hours.
+.Pp
+You can also list your worked time in a month by hours for each day.
+.
+.Sh OPTIONS
+.Bl -tag
+. It Fl b Ar time
+.  No Defines the given Em time No as the starttime of a timeslot.  Format is: Qq HH:MM Ns .
+.  No Forces occurrence of Fl e Ns .
+.  No Assumes the current day if no date is specified by using the Fl d Ns -switch.
+. It Fl d Ar date
+.  No  Assumes the given Date for the other switches.
+.  No  This switch support different formats dependend on which
+.  No  it is used with.
+.  Bl -tag
+.   It No when using Fl l No or Fl s Ns : Qq MM/YYYY
+.   It No when using Fl b No and Fl e Ns : Qq DD.MM.YYYY
+.  El
+
+. It Fl e Ar time
+.  No Defines the given Em time No as the endtime of a timeslot.
+.  No Format is: Qq HH:MM Ns .
+.  No Forces occurrence of Fl b Ns . Assumes the current day if no date
+.  No is specified by using the Fl d Ns -switch.
+
+. It Fl f Pa config-file
+.  No Instead of using the default Pa config-file
+.  Pq residing in Pa ~/.config/checkin/checkin.cfg
+.  No another Pa config-file No as denoted by the argument is used.
+
+. It Fl l
+.  No Lists the worked time for each day in the current month. If another
+.  No month is suggested by the Fl d Ns -switch this month Pq and year
+.  No is used instead.
+
+. It Fl s
+.  No Prints the status of the current month. By default it only
+.  No presents the worked hours and minutes of the current month
+.  Po
+.   No which is overriden by the Fl d Ns -switch
+.  Pc
+.  No .
+.  No If specified in a Pa config-file No it shows more useful stats.
+
+. It Fl v
+.  No Be more verbose...!
+.El
+.
+.Sh FILES
+.Bl -tag
+. It Pa ~/.config/checkin/checkin.cfg
+.  Pp
+.  No Per user configuration file. See Xr checkin 1 No for further details.
+.El
+.
+.Sh AUTHOR
+.An Tim Reddehase Aq Mt robustus@rightsrestricted.com
+.
+.Sh SEE ALSO
+.Bl -tag
+. It
+.  Xr checkin 5
+. It
+.  Lk https://github.com/0robustus1/checkin "checkin project page"
+. It
+.  Lk http://rightsrestricted.com homepage
+.El
