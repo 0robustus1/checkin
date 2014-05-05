@@ -6,27 +6,31 @@ void show_timeslot(struct Timeslot *ts)
   int hours = 0;
   int minutes = 0;
   calculate_difference(ts,&hours,&minutes);
+  char *beginsOutput, *endsOutput;
   if( ((ts->begins).tm_mday == (ts->ends).tm_mday) && ((ts->begins).tm_mon == (ts->ends).tm_mon) && ((ts->begins).tm_year == (ts->ends).tm_year) )
   {
     char *dateOutput = (char *) malloc(11 * sizeof(char));
-    char *beginsOutput = (char *) malloc( 6 * sizeof(char));
-    char *endsOutput = (char *) malloc( 6 * sizeof(char));
+    beginsOutput = (char *) malloc( 6 * sizeof(char));
+    endsOutput = (char *) malloc( 6 * sizeof(char));
     strftime(dateOutput, 11, "%d.%m.%Y",&(ts->begins));
     strftime(beginsOutput, 6, "%H:%M", &(ts->begins));
     strftime(endsOutput, 6, "%H:%M", &(ts->ends));
     printf("\t%s\n",dateOutput);
     printf("\tStarted: %s\n",beginsOutput);
     printf("\tEnded:   %s\n",endsOutput);
+    free(dateOutput);
   } 
   else
   {
-    char *beginsOutput = (char *) malloc( 20 * sizeof(char));
-    char *endsOutput = (char *) malloc( 20 * sizeof(char));
+    beginsOutput = (char *) malloc( 20 * sizeof(char));
+    endsOutput = (char *) malloc( 20 * sizeof(char));
     strftime(beginsOutput, 20, "%d.%m.%Y %T", &(ts->begins));
     strftime(endsOutput, 20, "%d.%m.%Y %T", &(ts->ends));
     printf("\tStarted: %s\n",beginsOutput);
     printf("\tEnded:   %s\n",endsOutput);
   }
+  free(beginsOutput);
+  free(endsOutput);
   printf("\tDuration: ");
   if( hours!=0 )
     printf("%ih ",hours);
@@ -70,7 +74,6 @@ void print_month(struct Timeslot *timeslots, int ts_count, int year, int month)
     struct Timeslot currentSlot = *(timeslots + i);
     calculate_difference( &currentSlot, &hours, &minutes );
     *(worked_days_in_minutes + (currentSlot.begins).tm_mday-1) += minutes + hours*60;
-    
   }
   int weeks_time = 0;
   int total = 0;
@@ -79,6 +82,7 @@ void print_month(struct Timeslot *timeslots, int ts_count, int year, int month)
     char *prefix = malloc( 15 * sizeof(char));
     strftime(prefix, 15, "%a, %d.%m ## ", &run_day);
     printf("%s\t%.2dh %.2dm ###\n",prefix, *(worked_days_in_minutes + i)/60, *(worked_days_in_minutes + i)%60);
+    free(prefix);
     weeks_time += *(worked_days_in_minutes + i);
     if( run_day.tm_wday == 0 || i==days_in_month-1 ) 
     {
@@ -96,4 +100,5 @@ void print_month(struct Timeslot *timeslots, int ts_count, int year, int month)
   printf("###########################\n");
   printf("####### Total: %.3dh %.2dm ###\n", total/60, total%60);
   printf("###########################\n");
+  free(worked_days_in_minutes);
 }
