@@ -1,0 +1,107 @@
+.Dd May 04, 2014
+.Dt CHECKIN 1
+.Os
+.
+.Sh NAME
+.Nm checkin.cfg
+.Nd checkin configuration file Sy currently concept page
+.
+.Sh SYNOPSIS
+.Bl -tag
+. It Pa ~/.config/checkin/checkin.cfg
+. It Pa ~/.checkinrc
+.El
+.
+.Sh DESCRIPTION
+.Eo
+. No This configuration file is used to set user-specific settings
+. No which are (usually) not supported by the commandline switches,
+. No because including them would bloat the commandline.
+.Ec
+.
+.No Every setting belongs to one of two categories:
+.Bl -dash
+. It
+contract-specific
+. It
+independent
+.El
+.Eo
+. No Independent settings are user-specific global settings which are
+. No are read in every mode and with every commandline-switch.
+. No Contract-specific settings are a little bit more complicated.
+. No A contract is a specific time you work for someone, in my case these
+. No times are usually very short
+. Po
+.  No three to six months, after that a
+.  No new contract must be negotiated
+. Pc
+. No . For this time-period some
+. No administration specific values are relevant when one tries to
+. No fill his or her timecard. For example the contract number. These
+. No contract-specific settings are in effect whenever we work on
+. No timeslots which belong to a contract Pq determined by time-period Ns .
+.Ec
+.Eo
+. No Now to the syntax of the configuration file.
+. No A normal setting would be set by a line like this:
+.
+. Em key = value Ns .
+.
+. Em [contract] No starts a new contract entry.
+.
+. Em ; No is the comment-character.
+.Ec
+.
+.Ss independent Settings
+.Em verbose No - true/false Pq Em false No - corresponds to the Fl v Ns -switch.
+.Ss contract-specific Settings
+.Em starts
+.No  -
+.Qq DD.MM.YYYY
+.Ns /
+.Ns Qq MM/YYYY
+.Ns , required - sets a contract start-date.
+
+.Em ends
+.No -
+.Qq DD.MM.YYYY
+.Ns /
+.Qq MM/YYYY
+.Ns , required - sets a contract end-date.
+
+.Em contract
+.No  - text, optional - sets an identification for this contract
+.Pq perhaps a transactionnumber
+
+.Em description
+.No - text, optional - an optional description which has no impact on programbehaviour.
+.Sh FILES
+.Bl -tag
+. It Pa ~/.config/checkin/checkin.cfg
+.  Pp
+.  No Per user configuration file. See Xr checkin 5 No for further details.
+. It Pa ~/.checkinrc
+.  Pp
+.  No Alternative file - not yet supported.
+. It Pa ~/.config/checkin/times.db
+.  Pp
+.  No User-specific timeslot database.
+.El
+.
+.Sh ENVIRONMENT
+.No Some settings can also be set via environment variables.
+.No A list of those variables will soon be available.
+.
+.Sh AUTHOR
+.An Tim Reddehase Aq Mt robustus@rightsrestricted.com
+.
+.Sh SEE ALSO
+.Bl -tag
+. It
+.  Xr checkin 5
+. It
+.  Lk https://github.com/0robustus1/checkin "checkin project page"
+. It
+.  Lk http://rightsrestricted.com homepage
+.El
