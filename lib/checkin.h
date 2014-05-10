@@ -1,13 +1,8 @@
-#include <time.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sqlite3.h>
-
+#include "common.h"
 #include "timeslot.h"
+#include "database.h"
 
 struct Timeslot* read_entries(sqlite3 *handle, int *counter, char *request);
-void checkin_create_database(char * const db_file);
 void checkin_list(sqlite3 *handle, struct tm *now, int *overrideYear, int *overrideMonth);
 void checkin_status(sqlite3 *handle, struct tm *now, int *overrideYear, int *overrideMonth);
 void checkin_add(sqlite3 *handle, struct tm *begins, struct tm *ends);

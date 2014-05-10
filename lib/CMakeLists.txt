@@ -6,5 +6,8 @@ add_executable(checkin checkin.c)
 set(CORELIBS ${SQLITE3_LIBRARIES})
 
 add_library(timeslot timeslot.c)
+add_library(database database.c)
 
-target_link_libraries(checkin ${CORELIBS} timeslot)
+set(LOCAL_LIBRARIES timeslot database)
+
+target_link_libraries(checkin ${CORELIBS} ${LOCAL_LIBRARIES})
