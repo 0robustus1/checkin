@@ -18,7 +18,10 @@ int main(int argc, char *argv[])
 {
   checkin_initialize();
   if( argc == 1 )
-    printf("no option or keyword specified...\n");
+  {
+    printf("No option or keyword specified. Starting shell...\n");
+    checkin_shell();
+  }
   else if( argc > 1)
   {
     char *keyword = NULL;

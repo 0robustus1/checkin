@@ -1,6 +1,7 @@
 #include "common.h"
 #include "timeslot.h"
 #include "database.h"
+#include "shell.h"
 
 struct Timeslot* read_entries(sqlite3 *handle, int *counter, char *request);
 void checkin_list(sqlite3 *handle, struct tm *now, int *overrideYear, int *overrideMonth);
