@@ -81,7 +81,19 @@ void out(char *output)
 void handle_options(char *keyword, int argc, char **argv)
 {
   int current_opt;
-  int day, month, year, beginsHour, beginsMinute, endsHour, endsMinute;
+
+  time_t now_epoch;
+  time(&now_epoch);
+  struct tm *now = localtime(&now_epoch);
+
+  int year = now->tm_year + 1900;
+  int month = now->tm_mon + 1;
+  int day = now->tm_mday;
+  int beginsHour = now->tm_hour - 1;
+  int beginsMinute = now->tm_min;
+  int endsHour = now->tm_hour;
+  int endsMinute = now->tm_min;
+
   while ((current_opt = getopt (argc, argv, "lsd:b:e:v")) != -1)
     switch(current_opt)
     {
@@ -119,9 +131,6 @@ void handle_options(char *keyword, int argc, char **argv)
       default:
         abort ();
     }
-  time_t now_epoch;
-  time(&now_epoch);
-  struct tm *now = localtime(&now_epoch);
   if( *mode != CheckinNoMode )
   {
     if( *d_opt_set==DateSet )
