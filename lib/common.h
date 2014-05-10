@@ -10,5 +10,6 @@
 
 extern const int true;
 extern const int false;
+extern const char * TIME_FORMAT;
 
 #endif /* COMMON_H_OCCURED */
