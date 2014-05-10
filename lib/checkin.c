@@ -1,27 +1,16 @@
 #include "checkin.h"
-#include <unistd.h>
-#include <sys/stat.h>
 
-const char * DATABASE_FILE = "times.db";
-const char * CONFIG_PATH   = ".config/checkin";
+const int true = 1;
+const int false = 0;
+
+void checkin_initialize();
+void checkin_terminate(int exit_state);
+
 const char * TIME_FORMAT   = "%Y-%m-%d %H:%M:00";
 const char * FETCH_MONTH_QUERY = "SELECT id,begins,ends "
                                  "FROM timeslots "
                                  "WHERE ends LIKE \"%Y-%m%%\";";
 
-const int true = 1;
-const int false = 0;
-
-sqlite3 *db_handler;
-int *db_open;
-void initialize_database_connection();
-void kill_database_connection();
-void open_db_connection(char * const db_file);
-void close_db_connection();
-void create_table(sqlite3 *handle);
-
-void checkin_initialize();
-void checkin_terminate(int exit_state);
 int *mode, *verbose, *b_opt_set, *d_opt_set, *e_opt_set;
 
 
@@ -45,42 +34,6 @@ int main(int argc, char *argv[])
     handle_options(keyword, arg_c, arg_v);
   }
   checkin_terminate(0);
-}
-
-void open_db_connection(char * const db_file)
-{
-  if ( !*db_open )
-  {
-    sqlite3_open(db_file, &db_handler);
-    *db_open = true;
-  }
-}
-
-void close_db_connection()
-{
-  if( *db_open )
-  {
-    sqlite3_close(db_handler);
-    *db_open = false;
-  }
-}
-
-void initialize_database_connection()
-{
-  char * db_file = (char *) malloc( 120 * sizeof(char) );
-  sprintf(db_file, "%s/%s/%s",getenv("HOME"),CONFIG_PATH,DATABASE_FILE);
-
-  struct stat db_file_stat;
-  if( stat(db_file, &db_file_stat) == -1 )
-    checkin_create_database(db_file);
-
-  open_db_connection(db_file);
-  free(db_file);
-}
-
-void kill_database_connection()
-{
-  close_db_connection();
 }
 
 void checkin_initialize()
@@ -128,7 +81,19 @@ void out(char *output)
 void handle_options(char *keyword, int argc, char **argv)
 {
   int current_opt;
-  int day, month, year, beginsHour, beginsMinute, endsHour, endsMinute;
+
+  time_t now_epoch;
+  time(&now_epoch);
+  struct tm *now = localtime(&now_epoch);
+
+  int year = now->tm_year + 1900;
+  int month = now->tm_mon + 1;
+  int day = now->tm_mday;
+  int beginsHour = now->tm_hour - 1;
+  int beginsMinute = now->tm_min;
+  int endsHour = now->tm_hour;
+  int endsMinute = now->tm_min;
+
   while ((current_opt = getopt (argc, argv, "lsd:b:e:v")) != -1)
     switch(current_opt)
     {
@@ -166,9 +131,6 @@ void handle_options(char *keyword, int argc, char **argv)
       default:
         abort ();
     }
-  time_t now_epoch;
-  time(&now_epoch);
-  struct tm *now = localtime(&now_epoch);
   if( *mode != CheckinNoMode )
   {
     if( *d_opt_set==DateSet )
@@ -357,26 +319,3 @@ struct Timeslot* read_entries(sqlite3 *handle, int *counter, char *request)
   sqlite3_finalize(stmt);
   return timeslots;
 }
-
-void checkin_create_database(char * const db_file)
-{
-  printf("Creating database...");
-  open_db_connection(db_file);
-  create_table(db_handler);
-  close_db_connection();
-  puts("successful");
-}
-
-void create_table(sqlite3 *handle)
-{
-  sqlite3_exec(handle,
-    "CREATE TABLE timeslots "
-      "(id integer primary key autoincrement, "
-      "begins text, "
-      "ends text, "
-      "description text "
-      ");",
-    NULL, NULL, NULL);
-}
-
-
