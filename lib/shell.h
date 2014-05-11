@@ -3,8 +3,12 @@
 
 #include "common.h"
 #include "commands.h"
+#include "shell_commands.h"
+
+extern const char *in_line_delimiters;
 
 void checkin_shell();
+void printNow();
 
 #endif /* SHELL_H_OCCURED */
 
