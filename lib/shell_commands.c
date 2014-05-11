@@ -46,6 +46,7 @@ int handle_stop()
 
     if( store ) {
       printf("Ok, i will store the timeslot...\n");
+      checkin_add(db_handler, current_start, current_stop);
     } else {
       printf("Storing of timeslot aborted.\n");
     }
