@@ -1,7 +1,6 @@
 #ifndef DATABASE_H_OCCURED
 #define DATABASE_H_OCCURED
 
-#include <sqlite3.h>
 #include "common.h"
 
 extern const char * DATABASE_FILE;
