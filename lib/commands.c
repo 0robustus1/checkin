@@ -37,11 +37,11 @@ void checkin_list(sqlite3 *handle, struct tm *now, int *overrideYear, int *overr
   struct Timeslot *timeslots;
   char *request = (char *) malloc( 81 * sizeof(char) );
   struct tm *usedTime;
-  if( overrideYear && overrideMonth )
+  if( overrideYear || overrideMonth )
   {
     struct tm tmp = {
-      .tm_year = *overrideYear-1900,
-      .tm_mon  = *overrideMonth-1
+      .tm_year = overrideYear ? *overrideYear-1900 : now->tm_year,
+      .tm_mon  = overrideMonth ? *overrideMonth-1 : now->tm_mon
     };
     strftime(request, 81, FETCH_MONTH_QUERY, &tmp);
     usedTime = &tmp;
