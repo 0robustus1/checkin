@@ -73,6 +73,25 @@ You can also list your worked time in a month by hours for each day.
 .  No Be more verbose...!
 .El
 .
+.Sh SHELL
+.Nm
+.No also support an interactive mode. This is commonly known as a shell.
+.No You can start the shell by invoking Nm checkin No without any arguments.
+.Bl -tag
+. It Sy list
+.  No Invokes list display of the current month. Also takes optional month argument, or
+.  No month/year argument.
+. It Sy start
+.  No Starts a so-called recording session. The current time will be stored.
+.  No This way you can dynamically allocate the worked time, by just checking in
+.  No at the beginning (and end), of your work. Works in conjunction with Sy stop Ns .
+. It Sy stop
+.  No Stops a running recording session. The current time will be stored as the end
+.  No of the timeslot. You will be askes for confirmation. Confirmation
+.  No can be provided by either entering "y" or "yes". "n" and "no" will deny storage and
+.  No the timeslot will be Em lost Ns .
+.El
+.
 .Sh FILES
 .Bl -tag
 . It Pa ~/.config/checkin/checkin.cfg

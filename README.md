@@ -21,7 +21,7 @@ by hours for each day.
 
 <code> checkin -s [-f <em>config-file</em>] [-d <strong>date</strong>]</code>
 
-<code> checkin [-d <strong>date</strong>] -b <strong>time</strong> -e <strong>time</time></code>
+<code> checkin [-d <strong>date</strong>] -b <strong>time</strong> -e <strong>time</strong></code>
 
 - `-b` **time**  
   Defines the given **time** as the starttime of a timeslot.
@@ -60,14 +60,33 @@ by hours for each day.
 - `-v`  
   Be more verbose...!
 
+### Shell
+
+If **checkin** is invoked without any arguments it is started in interactive
+mode, commonly known as *shell*.  Currently the shell is in experimental phase,
+but it supports at least one thing command-line arguments don't: dynamic
+start/stop.
+
+- `list`  
+  Invokes list display of the current month. Also takes optional *month*
+  argument, or *month/year* argument.
+- `start`  
+  Starts a so-called recording session. The current time will be stored.  This
+  way you can dynamically allocate the worked time, by just checking in at the
+  beginning (and end), of your work. Works in conjunction with `stop`.
+- `stop`  
+  Stops a running recording session. The current time will be stored as the end
+  of the timeslot. You will be askes for confirmation. Confirmation can be
+  provided by either entering "y" or "yes". "n" and "no" will deny storage and
+  the timeslot will be *lost*.
+
 ## Things to be done
 
-- use a packaging system (like autotools)
 - adding useful notes to timeslots
 - editor-integration (like git-commit)
   - especially jumping to `$EDITOR` when commiting to a timeslot  
     (for the description)
-- other small gadgets to make living easier ;)
+- full shell integration
 
 
 ## License
