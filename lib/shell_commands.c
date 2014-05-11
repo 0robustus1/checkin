@@ -1,6 +1,9 @@
 #include "shell_commands.h"
 
 int extract_month_params(int *year, int *month);
+void print_time(struct tm *time, const char *end_with);
+
+struct tm *current_start = NULL;
 
 struct tm * retrieve_now(struct tm *storage)
 {
@@ -12,14 +15,36 @@ struct tm * retrieve_now(struct tm *storage)
 int handle_start()
 {
   printf("encountered %s.\n", "start");
-  printNow();
+  if( !current_start ) {
+    current_start = (struct tm *) malloc( sizeof(struct tm) );
+    current_start = retrieve_now(current_start);
+    printf("Started Session at: ");
+    print_time(current_start, "\n");
+  } else {
+    printf("Already running a session, since: ");
+    print_time(current_start, "\n");
+  }
   return true;
 }
 
 int handle_stop()
 {
   printf("encountered %s.\n", "stop");
-  printNow();
+  if( current_start ) {
+    struct tm *current_stop = (struct tm *) malloc( sizeof(struct tm) );
+    retrieve_now(current_stop);
+    printf("Stopped...\n");
+    printf("Session-Info:\n");
+    printf("Start: ");
+    print_time(current_start, "\n");
+    printf("End: ");
+    print_time(current_stop, "\n");
+    free(current_start);
+    current_start = NULL;
+    free(current_stop);
+  } else {
+    printf("There is no current session.\n");
+  }
   return true;
 }
 
@@ -90,4 +115,14 @@ int extract_month_params(int *year_p, int *month_p)
   } else {
     return -1;
   }
+}
+
+void print_time(struct tm *time, const char *end_with)
+{
+  char *time_string = (char *) malloc(20 * sizeof(char));
+  strftime(time_string, 20, TIME_FORMAT, time);
+
+  printf("%s%s", time_string, end_with);
+
+  free(time_string);
 }

@@ -50,19 +50,6 @@ int process_line()
   return true;
 }
 
-void printNow()
-{
-  time_t now_epoch;
-  time(&now_epoch);
-  struct tm *now = localtime(&now_epoch);
-  char *time_string = (char *) malloc(20 * sizeof(char));
-  strftime(time_string, 20, TIME_FORMAT, now);
-
-  printf("%s\n", time_string);
-
-  free(time_string);
-}
-
 void setup_shell()
 {
   line = (char *) malloc(max_line_length * sizeof(char));
