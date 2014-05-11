@@ -2,6 +2,7 @@
 #define SHELL_H_OCCURED
 
 #include "common.h"
+#include "commands.h"
 
 void checkin_shell();
 
