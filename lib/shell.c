@@ -47,7 +47,15 @@ int process_line()
     struct tm now;
     struct tm *now_p = retrieve_now(&now);
 
-    checkin_list(db_handler, now_p, NULL, NULL);
+    char *param = strtok(NULL, in_line_delimiters);
+    if( param ) {
+      int month, year;
+      if( sscanf(param, "%d/%d", &month, &year) == 2) {
+        checkin_list(db_handler, now_p, &year, &month);
+      }
+    } else {
+      checkin_list(db_handler, now_p, NULL, NULL);
+    }
   }
 
   fflush(NULL);
