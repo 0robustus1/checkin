@@ -17,13 +17,10 @@ int checkin_add(sqlite3 *handle, struct tm *begins, struct tm *ends)
   sprintf(request,
           "INSERT INTO timeslots (begins,ends) VALUES (\"%s\",\"%s\");",
           beginsString,
-          endsString
-         );
-  /*puts(request);*/
+          endsString);
   sqlite3_stmt *stmt;
   sqlite3_prepare(handle, request, -1, &stmt, NULL);
-  if( sqlite3_step(stmt) != SQLITE_DONE )
-  {
+  if( sqlite3_step(stmt) != SQLITE_DONE ) {
     printf("Problem encountered while trying to save...\n");
     return false;
   }
@@ -37,23 +34,19 @@ void checkin_list(sqlite3 *handle, struct tm *now, int *overrideYear, int *overr
   struct Timeslot *timeslots;
   char *request = (char *) malloc( 81 * sizeof(char) );
   struct tm *usedTime;
-  if( overrideYear || overrideMonth )
-  {
+  if( overrideYear || overrideMonth ) {
     struct tm tmp = {
       .tm_year = overrideYear ? *overrideYear-1900 : now->tm_year,
       .tm_mon  = overrideMonth ? *overrideMonth-1 : now->tm_mon
     };
     strftime(request, 81, FETCH_MONTH_QUERY, &tmp);
     usedTime = &tmp;
-  } else
-  {
+  } else {
     strftime(request, 81, FETCH_MONTH_QUERY, now);
     usedTime = now;
   }
   timeslots = read_entries(handle, &entries, request);
-  if (timeslots == NULL) 
-  {
-    /*puts(request);*/
+  if (timeslots == NULL) {
     /*puts("Problem while parsing...");*/
     /*exit(1);*/
   }
@@ -69,16 +62,14 @@ void checkin_status(sqlite3 *handle, struct tm *now, int *overrideYear, int *ove
   struct Timeslot *timeslots;
   char *request = (char *) malloc( 81 * sizeof(char) );
   struct tm *usedTime;
-  if( overrideYear && overrideMonth )
-  {
+  if( overrideYear && overrideMonth ) {
     struct tm tmp = {
       .tm_year = *overrideYear-1900,
       .tm_mon  = *overrideMonth-1
     };
     strftime(request, 81, FETCH_MONTH_QUERY, &tmp);
     usedTime = &tmp;
-  } else
-  {
+  } else {
     strftime(request, 81, FETCH_MONTH_QUERY, now);
     usedTime = now;
   }
@@ -89,8 +80,7 @@ void checkin_status(sqlite3 *handle, struct tm *now, int *overrideYear, int *ove
   int time_sum = 0;
   int hours = 0;
   int minutes = 0;
-  for(i=0;i<entries;i++)
-  {
+  for(i=0;i<entries;i++) {
     hours = 0;
     minutes = 0;
     calculate_difference( (timeslots+i), &hours, &minutes );
@@ -111,15 +101,14 @@ struct Timeslot* read_entries(sqlite3 *handle, int *counter, char *request)
   int step = sizeof(struct Timeslot);
   *counter = 0;
   struct Timeslot *timeslots = (struct Timeslot*) malloc(1 * step);
-  while(sqlite3_step(stmt) != SQLITE_DONE)
-  {
+  while(sqlite3_step(stmt) != SQLITE_DONE) {
     if (*counter>0)
       timeslots = (struct Timeslot*) realloc(timeslots, (*counter+1) * step);
     int currentId = sqlite3_column_int(stmt, 0);
     const char *beginsRaw = (const char *) sqlite3_column_text(stmt, 1);
     const char *endsRaw = (const char *) sqlite3_column_text(stmt, 2);
     struct tm begins;
-    struct tm ends; 
+    struct tm ends;
     if (strptime(beginsRaw, TIME_FORMAT , &begins) == 0)
       printf("Error while parsing \"begins\"\n");
     if (strptime(endsRaw, TIME_FORMAT, &ends) == 0)
@@ -127,19 +116,15 @@ struct Timeslot* read_entries(sqlite3 *handle, int *counter, char *request)
     /*Wrong values in tm_sec could alter important values*/
     begins.tm_sec = 0;
     begins.tm_sec = 0;
-    /*Normalize the values.*/
-    /*mktime(&begins);*/
-    /*mktime(&ends);*/
     struct Timeslot timeslot = {
       .id = currentId,
       .begins = begins,
       .ends = ends
     };
-    *(timeslots + (*counter)) = timeslot; 
+    *(timeslots + (*counter)) = timeslot;
     *counter+=1;
   }
-  if (*counter==0)
-  {
+  if (*counter==0) {
     free(timeslots);
     timeslots = NULL;
   }

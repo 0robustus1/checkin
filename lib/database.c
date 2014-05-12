@@ -5,8 +5,7 @@ const char * CONFIG_PATH   = ".config/checkin";
 
 void open_db_connection(char * const db_file)
 {
-  if ( !*db_open )
-  {
+  if ( !*db_open ) {
     sqlite3_open(db_file, &db_handler);
     *db_open = true;
   }
@@ -14,8 +13,7 @@ void open_db_connection(char * const db_file)
 
 void close_db_connection()
 {
-  if( *db_open )
-  {
+  if( *db_open ) {
     sqlite3_close(db_handler);
     *db_open = false;
   }

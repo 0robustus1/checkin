@@ -14,18 +14,16 @@ int *mode, *verbose, *b_opt_set, *d_opt_set, *e_opt_set;
 int main(int argc, char *argv[])
 {
   checkin_initialize();
-  if( argc == 1 )
-  {
+  if( argc == 1 ) {
     printf("No option or keyword specified. Starting shell...\n");
     checkin_shell();
   }
-  else if( argc > 1)
-  {
+  else if( argc > 1) {
     char *keyword = NULL;
     int arg_c = argc;
     char **arg_v = argv;
-    if( argv[1][0] != '-') /* not an option */
-    {
+    /* not an option */
+    if( argv[1][0] != '-' ) {
       keyword = argv[1];
       arg_c -= 1;
       arg_v = argv+1;
@@ -94,9 +92,8 @@ void handle_options(char *keyword, int argc, char **argv)
   int endsHour = now->tm_hour;
   int endsMinute = now->tm_min;
 
-  while ((current_opt = getopt (argc, argv, "lsd:b:e:v")) != -1)
-    switch(current_opt)
-    {
+  while ((current_opt = getopt (argc, argv, "lsd:b:e:v")) != -1) {
+    switch(current_opt) {
       case 'l':
         *mode = CheckinListing;
         break;
@@ -104,18 +101,16 @@ void handle_options(char *keyword, int argc, char **argv)
         *mode = CheckinStatus;
         break;
       case 'd':
-        if( sscanf(optarg, "%d.%d.%d", &day, &month, &year) != 3 )
-        {
-          if( sscanf(optarg, "%d/%d", &month, &year) != 2 ) 
-          {
+        if( sscanf(optarg, "%d.%d.%d", &day, &month, &year) != 3 ) {
+          if( sscanf(optarg, "%d/%d", &month, &year) != 2 ) {
             out("-d switch used in the wrong way...");
             checkin_terminate(1);
-          }
-          else
+          } else {
             *d_opt_set = DateWithoutDaySet;
-        }
-        else
+          }
+        } else {
           *d_opt_set = DateSet;
+        }
         break;
       case 'b':
         sscanf(optarg, "%d:%d", &beginsHour, &beginsMinute);
@@ -131,8 +126,8 @@ void handle_options(char *keyword, int argc, char **argv)
       default:
         abort ();
     }
-  if( *mode != CheckinNoMode )
-  {
+  }
+  if( *mode != CheckinNoMode ) {
     if( *d_opt_set==DateSet )
       out("Date set, ignoring day-value...");
     if( *mode == CheckinListing )
@@ -141,20 +136,16 @@ void handle_options(char *keyword, int argc, char **argv)
       checkin_status(db_handler, now, (*d_opt_set) ? &year : NULL, (*d_opt_set) ? &month : NULL);
     kill_database_connection();
     checkin_terminate(0);
-  } else
-  {
-    if( !(*b_opt_set && *e_opt_set) )
-    {
+  } else {
+    if( !(*b_opt_set && *e_opt_set) ) {
       out("Just one of {-b,-e} set, you need to set both...");
       checkin_terminate(1);
     }
-    if( *d_opt_set==DateWithoutDaySet )
-    {
+    if( *d_opt_set==DateWithoutDaySet ) {
       out("You need to use the DD.MM.YYY format when adding...");
       checkin_terminate(1);
     }
-    if( !*d_opt_set )
-    {
+    if( !*d_opt_set ) {
       out("No date set, using todays date...");
       year = now->tm_year+1900;
       month = now->tm_mon+1;
