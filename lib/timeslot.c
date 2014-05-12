@@ -1,5 +1,16 @@
 #include "timeslot.h"
 
+/*
+ * Returns boolean for the question if begins and ends
+ * of a Timeslot refer to the same exact day.
+ */
+int timeslot_same_day(struct Timeslot *ts)
+{
+  return ((ts->begins).tm_mday == (ts->ends).tm_mday) && // Day of Month is equal
+    ((ts->begins).tm_mon == (ts->ends).tm_mon) && // Month is equal
+    ((ts->begins).tm_year == (ts->ends).tm_year); // Year is equal
+}
+
 void show_timeslot(struct Timeslot *ts)
 {
   printf("Timeslot (%i)\n",ts->id);
@@ -7,7 +18,7 @@ void show_timeslot(struct Timeslot *ts)
   int minutes = 0;
   calculate_difference(ts,&hours,&minutes);
   char *beginsOutput, *endsOutput;
-  if( ((ts->begins).tm_mday == (ts->ends).tm_mday) && ((ts->begins).tm_mon == (ts->ends).tm_mon) && ((ts->begins).tm_year == (ts->ends).tm_year) ) {
+  if( timeslot_same_day(ts) ) {
     char *dateOutput = (char *) malloc(11 * sizeof(char));
     beginsOutput = (char *) malloc( 6 * sizeof(char));
     endsOutput = (char *) malloc( 6 * sizeof(char));
@@ -37,7 +48,7 @@ void show_timeslot(struct Timeslot *ts)
 
 
 void calculate_difference(struct Timeslot *ts, int *hours, int *minutes) {
-  if( ((ts->begins).tm_mday == (ts->ends).tm_mday) && ((ts->begins).tm_mon == (ts->ends).tm_mon) && ((ts->begins).tm_year == (ts->ends).tm_year) ) {
+  if( timeslot_same_day(ts) ) {
     *hours = abs( (ts->ends).tm_hour - (ts->begins).tm_hour );
     *minutes = abs( (ts->ends).tm_min - (ts->begins).tm_min );
     if( (ts->ends).tm_min < (ts->begins).tm_min ) {
