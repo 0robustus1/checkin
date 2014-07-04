@@ -1,4 +1,57 @@
+#include "common.h"
 #include "timeslot.h"
+
+struct Timeslot* timeslot_create(int id, const char *begins_raw, const char *ends_raw, struct Timeslot* slot)
+{
+  struct Timeslot* timeslot = slot;
+  struct tm *begins = tm_create_from_raw(begins_raw);
+  struct tm *ends = tm_create_from_raw(ends_raw);
+  bool malloced = false;
+
+  if( !slot ) {
+    timeslot = malloc(sizeof(struct Timeslot));
+    malloced = true;
+  }
+
+  if( !(begins && ends) ) {
+    if( malloced )
+      timeslot_destroy(timeslot);
+    return NULL;
+  }
+
+  timeslot->id = id;
+  timeslot->begins = *begins;
+  timeslot->ends = *ends;
+
+  tm_destroy(begins);
+  tm_destroy(ends);
+
+  return timeslot;
+}
+
+struct tm * tm_create_from_raw(const char *raw)
+{
+  struct tm *tm_p = malloc(sizeof(struct tm));
+  if (strptime(raw, TIME_FORMAT , tm_p) != 0) {
+    /*Wrong values in tm_sec could alter important values*/
+    tm_p->tm_sec = 0;
+    tm_p->tm_sec = 0;
+    return tm_p;
+  } else {
+    tm_destroy(tm_p);
+    return NULL;
+  }
+}
+
+void tm_destroy(struct tm *tm_p)
+{
+  free(tm_p);
+}
+
+void timeslot_destroy(struct Timeslot* timeslot_p)
+{
+  free(timeslot_p);
+}
 
 /*
  * Returns boolean for the question if begins and ends

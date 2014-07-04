@@ -107,22 +107,12 @@ struct Timeslot* read_entries(sqlite3 *handle, int *counter, char *request)
     int currentId = sqlite3_column_int(stmt, 0);
     const char *beginsRaw = (const char *) sqlite3_column_text(stmt, 1);
     const char *endsRaw = (const char *) sqlite3_column_text(stmt, 2);
-    struct tm begins;
-    struct tm ends;
-    if (strptime(beginsRaw, TIME_FORMAT , &begins) == 0)
-      printf("Error while parsing \"begins\"\n");
-    if (strptime(endsRaw, TIME_FORMAT, &ends) == 0)
-      printf("Error while parsing \"ends\"\n");
-    /*Wrong values in tm_sec could alter important values*/
-    begins.tm_sec = 0;
-    begins.tm_sec = 0;
-    struct Timeslot timeslot = {
-      .id = currentId,
-      .begins = begins,
-      .ends = ends
-    };
-    *(timeslots + (*counter)) = timeslot;
-    *counter+=1;
+    struct Timeslot *timeslot_p = timeslot_create(currentId, beginsRaw, endsRaw, (timeslots + *counter));
+    if( timeslot_p ) {
+      *counter+=1;
+    } else {
+      fprintf(stderr, "Could not retrieve timeslot from database.\n");
+    }
   }
   if (*counter==0) {
     free(timeslots);
