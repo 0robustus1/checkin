@@ -1,8 +1,5 @@
 #include "checkin.h"
 
-const int true = 1;
-const int false = 0;
-
 void checkin_initialize();
 void checkin_terminate(int exit_state);
 
