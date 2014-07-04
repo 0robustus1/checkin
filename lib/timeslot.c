@@ -1,15 +1,15 @@
 #include "common.h"
 #include "timeslot.h"
 
-struct Timeslot* timeslot_create(int id, const char *begins_raw, const char *ends_raw, struct Timeslot* slot)
+timeslot_p timeslot_create(int id, const char *begins_raw, const char *ends_raw, const timeslot_p slot)
 {
-  struct Timeslot* timeslot = slot;
-  struct tm *begins = tm_create_from_raw(begins_raw);
-  struct tm *ends = tm_create_from_raw(ends_raw);
+  timeslot_p timeslot = slot;
+  tm_p begins = tm_create_from_raw(begins_raw);
+  tm_p ends = tm_create_from_raw(ends_raw);
   bool malloced = false;
 
   if( !slot ) {
-    timeslot = malloc(sizeof(struct Timeslot));
+    timeslot = malloc(sizeof(timeslot_t));
     malloced = true;
   }
 
@@ -29,42 +29,42 @@ struct Timeslot* timeslot_create(int id, const char *begins_raw, const char *end
   return timeslot;
 }
 
-struct tm * tm_create_from_raw(const char *raw)
+tm_p tm_create_from_raw(const char *raw)
 {
-  struct tm *tm_p = malloc(sizeof(struct tm));
-  if (strptime(raw, TIME_FORMAT , tm_p) != 0) {
+  tm_p tm = malloc(sizeof(tm_t));
+  if (strptime(raw, TIME_FORMAT , tm) != 0) {
     /*Wrong values in tm_sec could alter important values*/
-    tm_p->tm_sec = 0;
-    tm_p->tm_sec = 0;
-    return tm_p;
+    tm->tm_sec = 0;
+    tm->tm_sec = 0;
+    return tm;
   } else {
-    tm_destroy(tm_p);
+    tm_destroy(tm);
     return NULL;
   }
 }
 
-void tm_destroy(struct tm *tm_p)
+void tm_destroy(tm_p tm)
 {
-  free(tm_p);
+  free(tm);
 }
 
-void timeslot_destroy(struct Timeslot* timeslot_p)
+void timeslot_destroy(const timeslot_p timeslot)
 {
-  free(timeslot_p);
+  free(timeslot);
 }
 
 /*
  * Returns boolean for the question if begins and ends
  * of a Timeslot refer to the same exact day.
  */
-int timeslot_same_day(struct Timeslot *ts)
+int timeslot_same_day(timeslot_p ts)
 {
   return ((ts->begins).tm_mday == (ts->ends).tm_mday) && // Day of Month is equal
     ((ts->begins).tm_mon == (ts->ends).tm_mon) && // Month is equal
     ((ts->begins).tm_year == (ts->ends).tm_year); // Year is equal
 }
 
-void show_timeslot(struct Timeslot *ts)
+void show_timeslot(timeslot_p ts)
 {
   printf("Timeslot (%i)\n",ts->id);
   int hours = 0;
@@ -100,7 +100,7 @@ void show_timeslot(struct Timeslot *ts)
 }
 
 
-void calculate_difference(struct Timeslot *ts, int *hours, int *minutes) {
+void calculate_difference(timeslot_p ts, int *hours, int *minutes) {
   if( timeslot_same_day(ts) ) {
     *hours = abs( (ts->ends).tm_hour - (ts->begins).tm_hour );
     *minutes = abs( (ts->ends).tm_min - (ts->begins).tm_min );
@@ -113,10 +113,10 @@ void calculate_difference(struct Timeslot *ts, int *hours, int *minutes) {
 }
 
 
-void print_month(struct Timeslot *timeslots, int ts_count, int year, int month)
+void print_month(timeslot_p timeslots, int ts_count, int year, int month)
 {
-  struct tm run_day = {.tm_year = year, .tm_mon = month, .tm_mday = 1};
-  struct tm last_day = {.tm_year = year, .tm_mon = month+1, .tm_mday = 0};
+  tm_t run_day = {.tm_year = year, .tm_mon = month, .tm_mday = 1};
+  tm_t last_day = {.tm_year = year, .tm_mon = month+1, .tm_mday = 0};
   mktime(&run_day);
   mktime(&last_day);
   int days_in_month = last_day.tm_mday;
@@ -129,7 +129,7 @@ void print_month(struct Timeslot *timeslots, int ts_count, int year, int month)
   for(i=0;i<ts_count;i++) {
     hours = 0;
     minutes = 0;
-    struct Timeslot currentSlot = *(timeslots + i);
+    timeslot_t currentSlot = *(timeslots + i);
     calculate_difference( &currentSlot, &hours, &minutes );
     *(worked_days_in_minutes + (currentSlot.begins).tm_mday-1) += minutes + hours*60;
   }

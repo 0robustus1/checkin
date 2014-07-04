@@ -79,7 +79,7 @@ void handle_options(char *keyword, int argc, char **argv)
 
   time_t now_epoch;
   time(&now_epoch);
-  struct tm *now = localtime(&now_epoch);
+  tm_p now = localtime(&now_epoch);
 
   int year = now->tm_year + 1900;
   int month = now->tm_mon + 1;
@@ -148,14 +148,14 @@ void handle_options(char *keyword, int argc, char **argv)
       month = now->tm_mon+1;
       day = now->tm_mday;
     }
-    struct tm begins = {
+    tm_t begins = {
       .tm_year  = year-1900,
       .tm_mon   = month-1,
       .tm_mday  = day,
       .tm_hour  = beginsHour-1,
       .tm_min   = beginsMinute
     };
-    struct tm ends = {
+    tm_t ends = {
       .tm_year  = year-1900,
       .tm_mon   = month-1,
       .tm_mday  = day,

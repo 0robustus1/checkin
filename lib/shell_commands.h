@@ -5,7 +5,7 @@
 #include "commands.h"
 #include "shell.h"
 
-struct tm * retrieve_now(struct tm *storage);
+tm_p retrieve_now(tm_p storage);
 int handle_list();
 int handle_start();
 int handle_stop();

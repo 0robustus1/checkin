@@ -1,13 +1,13 @@
 #include "shell_commands.h"
 
 int extract_month_params(int *year, int *month);
-void print_time(struct tm *time, const char *end_with);
+void print_time(tm_p time, const char *end_with);
 int ask_for_confirmation(char *confirm_for);
 int answer_to_boolean(char *answer);
 
-struct tm *current_start = NULL;
+tm_p current_start = NULL;
 
-struct tm * retrieve_now(struct tm *storage)
+tm_p retrieve_now(tm_p storage)
 {
   time_t now_epoch;
   time(&now_epoch);
@@ -18,7 +18,7 @@ int handle_start()
 {
   printf("encountered %s.\n", "start");
   if( !current_start ) {
-    current_start = (struct tm *) malloc( sizeof(struct tm) );
+    current_start = malloc( sizeof(tm_t) );
     current_start = retrieve_now(current_start);
     printf("Started Session at: ");
     print_time(current_start, "\n");
@@ -33,7 +33,7 @@ int handle_stop()
 {
   printf("encountered %s.\n", "stop");
   if( current_start ) {
-    struct tm *current_stop = (struct tm *) malloc( sizeof(struct tm) );
+    tm_p current_stop = malloc( sizeof(tm_t) );
     retrieve_now(current_stop);
     printf("Stopped...\n");
     printf("Session-Info:\n");
@@ -62,8 +62,8 @@ int handle_stop()
 
 int handle_list()
 {
-  struct tm now;
-  struct tm *now_p = retrieve_now(&now);
+  tm_t now;
+  tm_p now_p = retrieve_now(&now);
 
   int *year_p = (int *) malloc( sizeof(int) );
   int *month_p = (int *) malloc( sizeof(int) );
@@ -129,7 +129,7 @@ int extract_month_params(int *year_p, int *month_p)
   }
 }
 
-void print_time(struct tm *time, const char *end_with)
+void print_time(tm_p time, const char *end_with)
 {
   char *time_string = (char *) malloc(20 * sizeof(char));
   strftime(time_string, 20, TIME_FORMAT, time);

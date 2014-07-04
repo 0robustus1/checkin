@@ -7,13 +7,13 @@ const char * FETCH_MONTH_QUERY = "SELECT id,begins,ends "
  * Returns "boolean" which represents whether the execution
  * was successful.
  */
-int checkin_add(sqlite3 *handle, struct tm *begins, struct tm *ends)
+int checkin_add(sqlite3 *handle, tm_p begins, tm_p ends)
 {
   char *request = (char *) malloc( 125 * sizeof(char) );
   char *beginsString = (char *) malloc( 20 * sizeof(char) );
   char *endsString = (char *) malloc( 20 * sizeof(char) );
-  strftime(beginsString, 20, TIME_FORMAT, begins); 
-  strftime(endsString, 20, TIME_FORMAT, ends); 
+  strftime(beginsString, 20, TIME_FORMAT, begins);
+  strftime(endsString, 20, TIME_FORMAT, ends);
   sprintf(request,
           "INSERT INTO timeslots (begins,ends) VALUES (\"%s\",\"%s\");",
           beginsString,
@@ -28,14 +28,14 @@ int checkin_add(sqlite3 *handle, struct tm *begins, struct tm *ends)
   return true;
 }
 
-void checkin_list(sqlite3 *handle, struct tm *now, int *overrideYear, int *overrideMonth)
+void checkin_list(sqlite3 *handle, tm_p now, int *overrideYear, int *overrideMonth)
 {
   int entries = 0;
-  struct Timeslot *timeslots;
+  timeslot_p timeslots;
   char *request = (char *) malloc( 81 * sizeof(char) );
-  struct tm *usedTime;
+  tm_p usedTime;
   if( overrideYear || overrideMonth ) {
-    struct tm tmp = {
+    tm_t tmp = {
       .tm_year = overrideYear ? *overrideYear-1900 : now->tm_year,
       .tm_mon  = overrideMonth ? *overrideMonth-1 : now->tm_mon
     };
@@ -55,15 +55,15 @@ void checkin_list(sqlite3 *handle, struct tm *now, int *overrideYear, int *overr
   free(timeslots);
 }
 
-void checkin_status(sqlite3 *handle, struct tm *now, int *overrideYear, int *overrideMonth)
+void checkin_status(sqlite3 *handle, tm_p now, int *overrideYear, int *overrideMonth)
 {
   int entries = 0;
   int i;
-  struct Timeslot *timeslots;
+  timeslot_p timeslots;
   char *request = (char *) malloc( 81 * sizeof(char) );
-  struct tm *usedTime;
+  tm_p usedTime;
   if( overrideYear && overrideMonth ) {
-    struct tm tmp = {
+    tm_t tmp = {
       .tm_year = *overrideYear-1900,
       .tm_mon  = *overrideMonth-1
     };
@@ -92,23 +92,23 @@ void checkin_status(sqlite3 *handle, struct tm *now, int *overrideYear, int *ove
   free(timeslots);
 }
 
-struct Timeslot* read_entries(sqlite3 *handle, int *counter, char *request)
+timeslot_p read_entries(sqlite3 *handle, int *counter, char *request)
 {
   sqlite3_stmt *stmt;
 
   sqlite3_prepare(handle, request, -1, &stmt, NULL);
 
-  int step = sizeof(struct Timeslot);
+  int step = sizeof(timeslot_t);
   *counter = 0;
-  struct Timeslot *timeslots = (struct Timeslot*) malloc(1 * step);
+  timeslot_p timeslots = malloc(1 * step);
   while(sqlite3_step(stmt) != SQLITE_DONE) {
     if (*counter>0)
-      timeslots = (struct Timeslot*) realloc(timeslots, (*counter+1) * step);
+      timeslots = realloc(timeslots, (*counter+1) * step);
     int currentId = sqlite3_column_int(stmt, 0);
     const char *beginsRaw = (const char *) sqlite3_column_text(stmt, 1);
     const char *endsRaw = (const char *) sqlite3_column_text(stmt, 2);
-    struct Timeslot *timeslot_p = timeslot_create(currentId, beginsRaw, endsRaw, (timeslots + *counter));
-    if( timeslot_p ) {
+    timeslot_p timeslot = timeslot_create(currentId, beginsRaw, endsRaw, (timeslots + *counter));
+    if( timeslot ) {
       *counter+=1;
     } else {
       fprintf(stderr, "Could not retrieve timeslot from database.\n");
