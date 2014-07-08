@@ -1,6 +1,11 @@
 #include "common.h"
 #include "timeslot.h"
 
+static const char *table_name = "timeslots";
+
+static bool timeslot_persist_with_db(const timeslot_p timeslot, sqlite3 *handle);
+static timeslot_p timeslot_save_with_db(const tm_p begins_day, int begins_hour, int begins_minute, const tm_p ends_day, int ends_hour, int ends_minute, sqlite3 *handle);
+
 timeslot_p timeslot_create(int id, const char *begins_raw, const char *ends_raw, const timeslot_p slot)
 {
   timeslot_p timeslot = slot;
@@ -27,6 +32,65 @@ timeslot_p timeslot_create(int id, const char *begins_raw, const char *ends_raw,
   tm_destroy(ends);
 
   return timeslot;
+}
+
+tm_p now()
+{
+  time_t now_epoch;
+  time(&now_epoch);
+  tm_p now = localtime(&now_epoch);
+  tm_p tm = malloc(sizeof(tm_t));
+  *tm = *now;
+  return tm;
+}
+
+timeslot_p timeslot_save(const tm_p begins_day, int begins_hour, int begins_minute, const tm_p ends_day, int ends_hour, int ends_minute)
+{
+  return timeslot_save_with_db(begins_day, begins_hour, begins_minute,
+      ends_day, ends_hour, ends_minute, db_handler);
+}
+
+static timeslot_p timeslot_save_with_db(const tm_p begins_day, int begins_hour, int begins_minute, const tm_p ends_day, int ends_hour, int ends_minute, sqlite3 *handle)
+{
+  tm_p today_p = today();
+  timeslot_p timeslot = malloc( sizeof(timeslot_t) );
+
+  timeslot->begins = begins_day ? *begins_day : *today_p;
+  timeslot->begins.tm_hour = begins_hour - 1;
+  timeslot->begins.tm_min = begins_minute;
+  timeslot->ends = ends_day ? *ends_day : *today_p;
+  timeslot->ends.tm_hour = ends_hour - 1;
+  timeslot->ends.tm_min = ends_minute;
+
+  timeslot_persist_with_db(timeslot, handle);
+  tm_destroy(today_p);
+  return timeslot;
+}
+
+bool timeslot_persist(const timeslot_p timeslot)
+{
+  return timeslot_persist_with_db(timeslot, db_handler);
+}
+
+static bool timeslot_persist_with_db(const timeslot_p timeslot, sqlite3 *handle)
+{
+  char *request = malloc( 125 * sizeof(char) );
+  char *beginsString = malloc( 20 * sizeof(char) );
+  char *endsString = malloc( 20 * sizeof(char) );
+  strftime(beginsString, 20, TIME_FORMAT, &timeslot->begins);
+  strftime(endsString, 20, TIME_FORMAT, &timeslot->ends);
+  sprintf(request,
+          "INSERT INTO %s (begins,ends) VALUES (\"%s\",\"%s\");",
+          table_name, beginsString, endsString);
+  sqlite3_stmt *stmt;
+  sqlite3_prepare(handle, request, -1, &stmt, NULL);
+  if( sqlite3_step(stmt) != SQLITE_DONE ) {
+    printf("Problem encountered while trying to save...\n");
+    return false;
+  }
+  sqlite3_finalize(stmt);
+  timeslot->id = retrieve_latest_id_for(handle, table_name);
+  return true;
 }
 
 tm_p tm_create_from_raw(const char *raw)

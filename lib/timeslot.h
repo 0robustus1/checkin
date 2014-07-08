@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define today() now()
+
 struct Timeslot
 {
   int id;
@@ -24,7 +26,10 @@ void calculate_difference(timeslot_p ts, int *hours, int *minutes);
 void print_month(timeslot_p timeslots, int ts_count, int year, int month);
 timeslot_p timeslot_create(int id, const char *begins_raw, const char *ends_raw, timeslot_p slot);
 tm_p tm_create_from_raw(const char *raw);
+timeslot_p timeslot_save(const tm_p begins_day, int begins_hour, int begins_minute, const tm_p ends_day, int ends_hour, int ends_minute);
+bool timeslot_persist(const timeslot_p timeslot);
 void tm_destroy(tm_p tm);
 void timeslot_destroy(timeslot_p timeslot);
+tm_p now();
 
 #endif /* TIMESLOT_H_OCCURED */
