@@ -49,6 +49,26 @@ void create_table(sqlite3 *handle)
     NULL, NULL, NULL);
 }
 
+int retrieve_latest_id_for(sqlite3 *handle, const char *table_name)
+{
+  int id;
+  int invalid_id = -1;
+  sqlite3_stmt *stmt;
+
+  char *query_start = "SELECT seq FROM sqlite_sequence WHERE name=\"";
+  // 2 for closing parentheses and semicolon
+  int query_length = strlen(query_start) + 2;
+
+  char *request = malloc( (query_length + strlen(table_name)) * sizeof(char) );
+  sprintf(request, "%s%s%s", query_start, table_name, "\";");
+
+  sqlite3_prepare(handle, request, -1, &stmt, NULL);
+  id = (sqlite3_step(stmt) != SQLITE_ROW) ? invalid_id : sqlite3_column_int(stmt, 0);
+  sqlite3_finalize(stmt);
+
+  return id;
+}
+
 void checkin_create_database(char * const db_file)
 {
   printf("Creating database...");

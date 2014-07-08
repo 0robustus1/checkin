@@ -10,6 +10,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "database.h"
+
 extern const char * TIME_FORMAT;
 
 #endif /* COMMON_H_OCCURED */
