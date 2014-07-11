@@ -96,6 +96,11 @@ bool handle_list()
   return true;
 }
 
+bool handle_exit()
+{
+  return false;
+}
+
 /*
  * Returns false (zero), if errors were encountered.
  * Returns 1 if number of arguments is 1 (only month).

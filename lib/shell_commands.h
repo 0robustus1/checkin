@@ -9,6 +9,7 @@ tm_p retrieve_now(tm_p storage);
 bool handle_list();
 bool handle_start();
 bool handle_stop();
+bool handle_exit();
 
 #endif /* SHELL_COMMANDS_H_OCCURED */
 
