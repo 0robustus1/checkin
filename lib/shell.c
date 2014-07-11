@@ -1,15 +1,15 @@
 #include "shell.h"
 
-const int max_line_length = 160;
+static const int max_line_length = 160;
 const char *in_line_delimiters = " \n";
-const char *prompt = "±> ";
+static const char *prompt = "±> ";
 
-char *line;
+static char *line;
 
-void setup_shell();
-void teardown_shell();
+static void setup_shell();
+static void teardown_shell();
 
-int process_line();
+static bool process_line();
 
 void checkin_shell()
 {

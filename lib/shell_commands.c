@@ -14,7 +14,7 @@ tm_p retrieve_now(tm_p storage)
   return localtime_r(&now_epoch, storage);
 }
 
-int handle_start()
+bool handle_start()
 {
   printf("encountered %s.\n", "start");
   if( !current_start ) {
@@ -29,7 +29,7 @@ int handle_start()
   return true;
 }
 
-int handle_stop()
+bool handle_stop()
 {
   printf("encountered %s.\n", "stop");
   if( current_start ) {
@@ -60,7 +60,7 @@ int handle_stop()
   return true;
 }
 
-int handle_list()
+bool handle_list()
 {
   tm_t now;
   tm_p now_p = retrieve_now(&now);

@@ -6,9 +6,9 @@
 #include "shell.h"
 
 tm_p retrieve_now(tm_p storage);
-int handle_list();
-int handle_start();
-int handle_stop();
+bool handle_list();
+bool handle_start();
+bool handle_stop();
 
 #endif /* SHELL_COMMANDS_H_OCCURED */
 

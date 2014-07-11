@@ -1,7 +1,7 @@
 #include "checkin.h"
 
-void checkin_initialize();
-void checkin_terminate(int exit_state);
+static void checkin_initialize();
+static void checkin_terminate(int exit_state);
 
 const char * TIME_FORMAT   = "%Y-%m-%d %H:%M:00";
 
