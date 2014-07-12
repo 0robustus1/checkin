@@ -5,7 +5,6 @@
 #include "commands.h"
 #include "shell.h"
 
-tm_p retrieve_now(tm_p storage);
 bool handle_list();
 bool handle_start();
 bool handle_stop();

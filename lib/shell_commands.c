@@ -7,19 +7,11 @@ int answer_to_boolean(char *answer);
 
 tm_p current_start = NULL;
 
-tm_p retrieve_now(tm_p storage)
-{
-  time_t now_epoch;
-  time(&now_epoch);
-  return localtime_r(&now_epoch, storage);
-}
-
 bool handle_start()
 {
   printf("encountered %s.\n", "start");
   if( !current_start ) {
-    current_start = malloc( sizeof(tm_t) );
-    current_start = retrieve_now(current_start);
+    current_start = now();
     printf("Started Session at: ");
     print_time(current_start, "\n");
   } else {
@@ -33,8 +25,7 @@ bool handle_stop()
 {
   printf("encountered %s.\n", "stop");
   if( current_start ) {
-    tm_p current_stop = malloc( sizeof(tm_t) );
-    retrieve_now(current_stop);
+    tm_p current_stop = now();
     printf("Stopped...\n");
     printf("Session-Info:\n");
     printf("Start: ");
@@ -51,9 +42,9 @@ bool handle_stop()
       printf("Storing of timeslot aborted.\n");
     }
 
-    free(current_start);
+    tm_destroy(current_start);
     current_start = NULL;
-    free(current_stop);
+    tm_destroy(current_stop);
   } else {
     printf("There is no current session.\n");
   }
@@ -62,8 +53,7 @@ bool handle_stop()
 
 bool handle_list()
 {
-  tm_t now;
-  tm_p now_p = retrieve_now(&now);
+  tm_p now_p = now();
 
   int *year_p = (int *) malloc( sizeof(int) );
   int *month_p = (int *) malloc( sizeof(int) );
@@ -92,6 +82,7 @@ bool handle_list()
 
   free(month_p);
   free(year_p);
+  tm_destroy(now_p);
 
   return true;
 }
