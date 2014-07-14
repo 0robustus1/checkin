@@ -6,6 +6,7 @@ int ask_for_confirmation(char *confirm_for);
 int answer_to_boolean(char *answer);
 
 tm_p current_start = NULL;
+static const int margin_minutes = 15;
 
 bool handle_start()
 {
@@ -26,6 +27,8 @@ bool handle_stop()
   printf("encountered %s.\n", "stop");
   if( current_start ) {
     tm_p current_stop = now();
+    *current_start = tm_round(*current_start, margin_minutes);
+    *current_stop = tm_round(*current_stop, margin_minutes);
     printf("Stopped...\n");
     printf("Session-Info:\n");
     printf("Start: ");
