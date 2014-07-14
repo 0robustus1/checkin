@@ -194,6 +194,13 @@ void timeslot_inner_difference(timeslot_p timeslot, int *hours, int *minutes)
   }
 }
 
+int timeslot_length(timeslot_p timeslot)
+{
+  int hours, minutes;
+  timeslot_inner_difference(timeslot, &hours, &minutes);
+  return minutes + hours * 60;
+}
+
 
 void print_month(timeslot_p timeslots, int ts_count, int year, int month)
 {
