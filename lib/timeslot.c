@@ -151,7 +151,7 @@ void show_timeslot(timeslot_p ts)
   printf("Timeslot (%i)\n",ts->id);
   int hours = 0;
   int minutes = 0;
-  calculate_difference(ts,&hours,&minutes);
+  timeslot_inner_difference(ts,&hours,&minutes);
   char *beginsOutput, *endsOutput;
   if( timeslot_same_day(ts) ) {
     char *dateOutput = (char *) malloc(11 * sizeof(char));
@@ -182,15 +182,15 @@ void show_timeslot(timeslot_p ts)
 }
 
 
-void calculate_difference(timeslot_p ts, int *hours, int *minutes) {
-  if( timeslot_same_day(ts) ) {
-    *hours = abs( (ts->ends).tm_hour - (ts->begins).tm_hour );
-    *minutes = abs( (ts->ends).tm_min - (ts->begins).tm_min );
-    if( (ts->ends).tm_min < (ts->begins).tm_min ) {
+void timeslot_inner_difference(timeslot_p timeslot, int *hours, int *minutes)
+{
+  if( timeslot_same_day(timeslot) ) {
+    *minutes = abs( timeslot->ends.tm_min - timeslot->begins.tm_min );
+    *hours = abs( timeslot->ends.tm_hour - timeslot->begins.tm_hour );
+    if( timeslot->ends.tm_min < timeslot->begins.tm_min ) {
       *hours -= 1;
       *minutes = 60 - *minutes;
     }
-
   }
 }
 
@@ -212,7 +212,7 @@ void print_month(timeslot_p timeslots, int ts_count, int year, int month)
     hours = 0;
     minutes = 0;
     timeslot_t currentSlot = *(timeslots + i);
-    calculate_difference( &currentSlot, &hours, &minutes );
+    timeslot_inner_difference( &currentSlot, &hours, &minutes );
     *(worked_days_in_minutes + (currentSlot.begins).tm_mday-1) += minutes + hours*60;
   }
   int weeks_time = 0;

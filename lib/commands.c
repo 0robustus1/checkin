@@ -83,7 +83,7 @@ void checkin_status(sqlite3 *handle, tm_p now, int *overrideYear, int *overrideM
   for(i=0;i<entries;i++) {
     hours = 0;
     minutes = 0;
-    calculate_difference( (timeslots+i), &hours, &minutes );
+    timeslot_inner_difference( (timeslots+i), &hours, &minutes );
     time_sum += hours*60 + minutes;
   }
   printf("Overall working time: %.3dh %.2dm\n", time_sum/60, time_sum%60);
