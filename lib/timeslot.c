@@ -93,6 +93,24 @@ static bool timeslot_persist_with_db(const timeslot_p timeslot, sqlite3 *handle)
   return true;
 }
 
+void timeslot_round(timeslot_p timeslot, int margin_minutes)
+{
+  timeslot->begins = tm_round(timeslot->begins, margin_minutes);
+  timeslot->ends = tm_round(timeslot->begins, margin_minutes);
+}
+
+tm_t tm_round(tm_t tm, int margin_minutes)
+{
+  int margin = margin_minutes == 0 ? 60 : margin_minutes;
+  int multiplicator = tm.tm_min / margin;
+  int offset = tm.tm_min % margin;
+  if( offset > (margin / 2) )
+    multiplicator++;
+  tm.tm_min =  multiplicator * margin;
+  mktime(&tm);
+  return tm;
+}
+
 tm_p tm_create_from_raw(const char *raw)
 {
   tm_p tm = malloc(sizeof(tm_t));
