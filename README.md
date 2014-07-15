@@ -74,11 +74,16 @@ start/stop.
   Starts a so-called recording session. The current time will be stored.  This
   way you can dynamically allocate the worked time, by just checking in at the
   beginning (and end), of your work. Works in conjunction with `stop`.
+  Issuing the `start` command again will provide you with the current
+  state.
 - `stop`  
   Stops a running recording session. The current time will be stored as the end
   of the timeslot. You will be askes for confirmation. Confirmation can be
   provided by either entering "y" or "yes". "n" and "no" will deny storage and
   the timeslot will be *lost*.
+- `report`  
+  Will report the status for the current month (see `-s` in commandline
+  mode). If a start/stop cycle is running it will report on that as well.
 
 ## Things to be done
 
