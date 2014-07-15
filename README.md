@@ -1,6 +1,8 @@
 checkin - stupid timetracking
 =============================
 
+[![Build Status](https://travis-ci.org/0robustus1/checkin.svg?branch=master)](https://travis-ci.org/0robustus1/checkin)
+
 Checkin is a simple commandline tool to manage
 time you spent doing something. I used it to
 track my worked hours as a student assistant.

@@ -1,0 +1,5 @@
+language: c
+script: make cmake && make
+compiler:
+  - clang
+  - gcc
