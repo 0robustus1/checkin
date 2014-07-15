@@ -198,16 +198,18 @@ void show_timeslot(timeslot_p ts)
 
 void timeslot_inner_difference(timeslot_p timeslot, int *hours, int *minutes)
 {
-  if( timeslot_same_day(timeslot) ) {
-    *minutes = abs( timeslot->ends.tm_min - timeslot->begins.tm_min );
-    *hours = abs( timeslot->ends.tm_hour - timeslot->begins.tm_hour );
-    if( timeslot->ends.tm_min < timeslot->begins.tm_min ) {
-      *hours -= 1;
-      *minutes = 60 - *minutes;
-    }
-  }
+  time_t begins = mktime(&timeslot->begins);
+  time_t ends = mktime(&timeslot->ends);
+  double diff_seconds = difftime(ends, begins);
+  int diff_minutes = diff_seconds / 60;
+  *hours = diff_minutes / 60;
+  *minutes = diff_minutes % 60;
 }
 
+/*
+ * Calculates the length of a timeslot (the span between begins and ends) in
+ * minutes.
+ */
 int timeslot_length(timeslot_p timeslot)
 {
   int hours, minutes;
