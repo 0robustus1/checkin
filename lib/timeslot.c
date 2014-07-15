@@ -111,12 +111,26 @@ tm_t tm_round(tm_t tm, int margin_minutes)
   return tm;
 }
 
-tm_p tm_create_from_raw(const char *raw)
+tm_p tm_create_empty()
 {
   tm_p tm = malloc(sizeof(tm_t));
+  tm->tm_sec = 0;
+  tm->tm_min = 0;
+  tm->tm_hour = 0;
+  tm->tm_mday = 1;
+  tm->tm_mon = 0; // a.k.a. January
+  tm->tm_year = 0; // a.k.a. 1900
+  tm->tm_wday = 0; // a.k.a. Sunday
+  tm->tm_yday = 0;
+  tm->tm_isdst = -1; // no info available
+  return tm;
+}
+
+tm_p tm_create_from_raw(const char *raw)
+{
+  tm_p tm = tm_create_empty();
   if (strptime(raw, TIME_FORMAT , tm) != 0) {
     /*Wrong values in tm_sec could alter important values*/
-    tm->tm_sec = 0;
     tm->tm_sec = 0;
     return tm;
   } else {
