@@ -9,4 +9,4 @@ include_directories(${SQLITE3_INCLUDE_DIR})
 set(LIBS ${LIBS} ${SQLITE3_LIBRARIES})
 
 set(CMAKE_CXX_FLAGS "-g -Wall -std=c11 -pedantic")
-add_subdirectory(lib)
+add_subdirectory(lib bin)
