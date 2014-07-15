@@ -8,8 +8,7 @@ bool handle_start()
     printf("Started Session at: ");
     print_time(current_start, "\n");
   } else {
-    printf("Already running a session, since: ");
-    print_time(current_start, "\n");
+    report_status();
   }
   return true;
 }

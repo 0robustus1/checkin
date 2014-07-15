@@ -16,6 +16,7 @@ static shell_tuple_t shell_commands[] = {
   {.keyword = "stop", .shell_command = handle_stop},
   {.keyword = "list", .shell_command = handle_list},
   {.keyword = "exit", .shell_command = handle_exit},
+  {.keyword = "report", .shell_command = handle_report},
   {}, // end of array, sadly issues clang warning
 };
 
