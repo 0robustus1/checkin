@@ -21,8 +21,11 @@ typedef timeslot_t* timeslot_p;
 typedef struct tm tm_t;
 typedef tm_t* tm_p;
 
+extern const int timeslot_no_id;
+
 void show_timeslot(timeslot_p ts);
 void print_month(timeslot_p timeslots, int ts_count, int year, int month);
+timeslot_p timeslot_create_from_members(int *id, tm_p begins, tm_p ends, const timeslot_p slot);
 timeslot_p timeslot_create(int id, const char *begins_raw, const char *ends_raw, timeslot_p slot);
 tm_p tm_create_empty();
 tm_p tm_create_from_raw(const char *raw);

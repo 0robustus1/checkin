@@ -2,9 +2,23 @@
 #include "timeslot.h"
 
 static const char *table_name = "timeslots";
+const int timeslot_no_id = -1;
 
 static bool timeslot_persist_with_db(const timeslot_p timeslot, sqlite3 *handle);
 static timeslot_p timeslot_save_with_db(const tm_p begins_day, int begins_hour, int begins_minute, const tm_p ends_day, int ends_hour, int ends_minute, sqlite3 *handle);
+
+timeslot_p timeslot_create_from_members(int *id, tm_p begins, tm_p ends, const timeslot_p slot)
+{
+  timeslot_p timeslot = slot;
+  if( !slot )
+    timeslot = malloc(sizeof(timeslot_t));
+
+  timeslot->id = id ? *id : timeslot_no_id;
+  timeslot->begins = *begins;
+  timeslot->ends = *ends;
+
+  return timeslot;
+}
 
 timeslot_p timeslot_create(int id, const char *begins_raw, const char *ends_raw, const timeslot_p slot)
 {
