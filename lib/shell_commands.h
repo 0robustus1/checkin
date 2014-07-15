@@ -5,10 +5,21 @@
 #include "commands.h"
 #include "shell.h"
 
-struct tm * retrieve_now(struct tm *storage);
-int handle_list();
-int handle_start();
-int handle_stop();
+extern tm_p current_start;
+extern const int margin_minutes;
+
+int extract_month_params(int *year, int *month);
+void print_time(tm_p time, const char *end_with);
+int ask_for_confirmation(char *confirm_for);
+int answer_to_boolean(char *answer);
+void print_duration(tm_p start, tm_p end);
+void report_status();
+
+bool handle_list();
+bool handle_start();
+bool handle_stop();
+bool handle_exit();
+bool handle_report();
 
 #endif /* SHELL_COMMANDS_H_OCCURED */
 

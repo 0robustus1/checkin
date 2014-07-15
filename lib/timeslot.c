@@ -1,14 +1,187 @@
+#include "common.h"
 #include "timeslot.h"
 
-void show_timeslot(struct Timeslot *ts)
+static const char *table_name = "timeslots";
+const int timeslot_no_id = -1;
+
+static bool timeslot_persist_with_db(const timeslot_p timeslot, sqlite3 *handle);
+static timeslot_p timeslot_save_with_db(const tm_p begins_day, int begins_hour, int begins_minute, const tm_p ends_day, int ends_hour, int ends_minute, sqlite3 *handle);
+
+timeslot_p timeslot_create_from_members(int *id, tm_p begins, tm_p ends, const timeslot_p slot)
+{
+  timeslot_p timeslot = slot;
+  if( !slot )
+    timeslot = malloc(sizeof(timeslot_t));
+
+  timeslot->id = id ? *id : timeslot_no_id;
+  timeslot->begins = *begins;
+  timeslot->ends = *ends;
+
+  return timeslot;
+}
+
+timeslot_p timeslot_create(int id, const char *begins_raw, const char *ends_raw, const timeslot_p slot)
+{
+  timeslot_p timeslot = slot;
+  tm_p begins = tm_create_from_raw(begins_raw);
+  tm_p ends = tm_create_from_raw(ends_raw);
+  bool malloced = false;
+
+  if( !slot ) {
+    timeslot = malloc(sizeof(timeslot_t));
+    malloced = true;
+  }
+
+  if( !(begins && ends) ) {
+    if( malloced )
+      timeslot_destroy(timeslot);
+    return NULL;
+  }
+
+  timeslot->id = id;
+  timeslot->begins = *begins;
+  timeslot->ends = *ends;
+
+  tm_destroy(begins);
+  tm_destroy(ends);
+
+  return timeslot;
+}
+
+tm_p now()
+{
+  time_t now_epoch;
+  time(&now_epoch);
+  tm_p now = localtime(&now_epoch);
+  tm_p tm = malloc(sizeof(tm_t));
+  *tm = *now;
+  return tm;
+}
+
+timeslot_p timeslot_save(const tm_p begins_day, int begins_hour, int begins_minute, const tm_p ends_day, int ends_hour, int ends_minute)
+{
+  return timeslot_save_with_db(begins_day, begins_hour, begins_minute,
+      ends_day, ends_hour, ends_minute, db_handler);
+}
+
+static timeslot_p timeslot_save_with_db(const tm_p begins_day, int begins_hour, int begins_minute, const tm_p ends_day, int ends_hour, int ends_minute, sqlite3 *handle)
+{
+  tm_p today_p = today();
+  timeslot_p timeslot = malloc( sizeof(timeslot_t) );
+
+  timeslot->begins = begins_day ? *begins_day : *today_p;
+  timeslot->begins.tm_hour = begins_hour - 1;
+  timeslot->begins.tm_min = begins_minute;
+  timeslot->ends = ends_day ? *ends_day : *today_p;
+  timeslot->ends.tm_hour = ends_hour - 1;
+  timeslot->ends.tm_min = ends_minute;
+
+  timeslot_persist_with_db(timeslot, handle);
+  tm_destroy(today_p);
+  return timeslot;
+}
+
+bool timeslot_persist(const timeslot_p timeslot)
+{
+  return timeslot_persist_with_db(timeslot, db_handler);
+}
+
+static bool timeslot_persist_with_db(const timeslot_p timeslot, sqlite3 *handle)
+{
+  char *request = malloc( 125 * sizeof(char) );
+  char *beginsString = malloc( 20 * sizeof(char) );
+  char *endsString = malloc( 20 * sizeof(char) );
+  strftime(beginsString, 20, TIME_FORMAT, &timeslot->begins);
+  strftime(endsString, 20, TIME_FORMAT, &timeslot->ends);
+  sprintf(request,
+          "INSERT INTO %s (begins,ends) VALUES (\"%s\",\"%s\");",
+          table_name, beginsString, endsString);
+  sqlite3_stmt *stmt;
+  sqlite3_prepare(handle, request, -1, &stmt, NULL);
+  if( sqlite3_step(stmt) != SQLITE_DONE ) {
+    printf("Problem encountered while trying to save...\n");
+    return false;
+  }
+  sqlite3_finalize(stmt);
+  timeslot->id = retrieve_latest_id_for(handle, table_name);
+  return true;
+}
+
+void timeslot_round(timeslot_p timeslot, int margin_minutes)
+{
+  timeslot->begins = tm_round(timeslot->begins, margin_minutes);
+  timeslot->ends = tm_round(timeslot->begins, margin_minutes);
+}
+
+tm_t tm_round(tm_t tm, int margin_minutes)
+{
+  int margin = margin_minutes == 0 ? 60 : margin_minutes;
+  int multiplicator = tm.tm_min / margin;
+  int offset = tm.tm_min % margin;
+  if( offset > (margin / 2) )
+    multiplicator++;
+  tm.tm_min =  multiplicator * margin;
+  mktime(&tm);
+  return tm;
+}
+
+tm_p tm_create_empty()
+{
+  tm_p tm = malloc(sizeof(tm_t));
+  tm->tm_sec = 0;
+  tm->tm_min = 0;
+  tm->tm_hour = 0;
+  tm->tm_mday = 1;
+  tm->tm_mon = 0; // a.k.a. January
+  tm->tm_year = 0; // a.k.a. 1900
+  tm->tm_wday = 0; // a.k.a. Sunday
+  tm->tm_yday = 0;
+  tm->tm_isdst = -1; // no info available
+  return tm;
+}
+
+tm_p tm_create_from_raw(const char *raw)
+{
+  tm_p tm = tm_create_empty();
+  if (strptime(raw, TIME_FORMAT , tm) != 0) {
+    /*Wrong values in tm_sec could alter important values*/
+    tm->tm_sec = 0;
+    return tm;
+  } else {
+    tm_destroy(tm);
+    return NULL;
+  }
+}
+
+void tm_destroy(tm_p tm)
+{
+  free(tm);
+}
+
+void timeslot_destroy(const timeslot_p timeslot)
+{
+  free(timeslot);
+}
+
+/*
+ * Returns boolean for the question if begins and ends
+ * of a Timeslot refer to the same exact day.
+ */
+int timeslot_same_day(timeslot_p ts)
+{
+  return ((ts->begins).tm_mday == (ts->ends).tm_mday) && // Day of Month is equal
+    ((ts->begins).tm_mon == (ts->ends).tm_mon) && // Month is equal
+    ((ts->begins).tm_year == (ts->ends).tm_year); // Year is equal
+}
+
+void show_timeslot(timeslot_p ts)
 {
   printf("Timeslot (%i)\n",ts->id);
   int hours = 0;
   int minutes = 0;
-  calculate_difference(ts,&hours,&minutes);
+  timeslot_inner_difference(ts,&hours,&minutes);
   char *beginsOutput, *endsOutput;
-  if( ((ts->begins).tm_mday == (ts->ends).tm_mday) && ((ts->begins).tm_mon == (ts->ends).tm_mon) && ((ts->begins).tm_year == (ts->ends).tm_year) )
-  {
+  if( timeslot_same_day(ts) ) {
     char *dateOutput = (char *) malloc(11 * sizeof(char));
     beginsOutput = (char *) malloc( 6 * sizeof(char));
     endsOutput = (char *) malloc( 6 * sizeof(char));
@@ -19,9 +192,7 @@ void show_timeslot(struct Timeslot *ts)
     printf("\tStarted: %s\n",beginsOutput);
     printf("\tEnded:   %s\n",endsOutput);
     free(dateOutput);
-  } 
-  else
-  {
+  } else {
     beginsOutput = (char *) malloc( 20 * sizeof(char));
     endsOutput = (char *) malloc( 20 * sizeof(char));
     strftime(beginsOutput, 20, "%d.%m.%Y %T", &(ts->begins));
@@ -39,29 +210,35 @@ void show_timeslot(struct Timeslot *ts)
 }
 
 
-void calculate_difference(struct Timeslot *ts, int *hours, int *minutes)
+void timeslot_inner_difference(timeslot_p timeslot, int *hours, int *minutes)
 {
-  if( ((ts->begins).tm_mday == (ts->ends).tm_mday) && ((ts->begins).tm_mon == (ts->ends).tm_mon) && ((ts->begins).tm_year == (ts->ends).tm_year) )
-  {
-    *hours = abs( (ts->ends).tm_hour - (ts->begins).tm_hour );
-    *minutes = abs( (ts->ends).tm_min - (ts->begins).tm_min );
-    if( (ts->ends).tm_min < (ts->begins).tm_min )
-    {
-      *hours -= 1;
-      *minutes = 60 - *minutes;
-    }
+  time_t begins = mktime(&timeslot->begins);
+  time_t ends = mktime(&timeslot->ends);
+  double diff_seconds = difftime(ends, begins);
+  int diff_minutes = diff_seconds / 60;
+  *hours = diff_minutes / 60;
+  *minutes = diff_minutes % 60;
+}
 
-  }
+/*
+ * Calculates the length of a timeslot (the span between begins and ends) in
+ * minutes.
+ */
+int timeslot_length(timeslot_p timeslot)
+{
+  int hours, minutes;
+  timeslot_inner_difference(timeslot, &hours, &minutes);
+  return minutes + hours * 60;
 }
 
 
-void print_month(struct Timeslot *timeslots, int ts_count, int year, int month)
+void print_month(timeslot_p timeslots, int ts_count, int year, int month)
 {
-  struct tm run_day = {.tm_year = year, .tm_mon = month, .tm_mday = 1};
-  struct tm last_day = {.tm_year = year, .tm_mon = month+1, .tm_mday = 0};
+  tm_t run_day = {.tm_year = year, .tm_mon = month, .tm_mday = 1};
+  tm_t last_day = {.tm_year = year, .tm_mon = month+1, .tm_mday = 0};
   mktime(&run_day);
   mktime(&last_day);
-  int days_in_month = last_day.tm_mday; 
+  int days_in_month = last_day.tm_mday;
   int * worked_days_in_minutes = (int *) malloc(days_in_month * sizeof(int));
   int i;
   int hours = 0;
@@ -71,21 +248,19 @@ void print_month(struct Timeslot *timeslots, int ts_count, int year, int month)
   for(i=0;i<ts_count;i++) {
     hours = 0;
     minutes = 0;
-    struct Timeslot currentSlot = *(timeslots + i);
-    calculate_difference( &currentSlot, &hours, &minutes );
+    timeslot_t currentSlot = *(timeslots + i);
+    timeslot_inner_difference( &currentSlot, &hours, &minutes );
     *(worked_days_in_minutes + (currentSlot.begins).tm_mday-1) += minutes + hours*60;
   }
   int weeks_time = 0;
   int total = 0;
-  for(i=0;i<days_in_month;i++) 
-  {
+  for(i=0;i<days_in_month;i++) {
     char *prefix = malloc( 15 * sizeof(char));
     strftime(prefix, 15, "%a, %d.%m ## ", &run_day);
     printf("%s\t%.2dh %.2dm ###\n",prefix, *(worked_days_in_minutes + i)/60, *(worked_days_in_minutes + i)%60);
     free(prefix);
     weeks_time += *(worked_days_in_minutes + i);
-    if( run_day.tm_wday == 0 || i==days_in_month-1 ) 
-    {
+    if( run_day.tm_wday == 0 || i==days_in_month-1 ) {
       printf("###########################\n");
       printf("############### %.2dh %.2dm ###\n", weeks_time/60, weeks_time%60);
       printf("###########################\n");

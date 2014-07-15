@@ -1,15 +1,24 @@
 #include "shell.h"
 
-const int max_line_length = 160;
+static const int max_line_length = 160;
 const char *in_line_delimiters = " \n";
-const char *prompt = "±> ";
+static const char *prompt = "±> ";
 
-char *line;
+static char *line;
 
-void setup_shell();
-void teardown_shell();
+static void setup_shell();
+static void teardown_shell();
 
-int process_line();
+static bool process_line();
+
+static shell_tuple_t shell_commands[] = {
+  {.keyword = "start", .shell_command = handle_start},
+  {.keyword = "stop", .shell_command = handle_stop},
+  {.keyword = "list", .shell_command = handle_list},
+  {.keyword = "exit", .shell_command = handle_exit},
+  {.keyword = "report", .shell_command = handle_report},
+  {}, // end of array, sadly issues clang warning
+};
 
 void checkin_shell()
 {
@@ -32,18 +41,13 @@ void checkin_shell()
  * Returns "boolean" which represents whether the program
  * should continue.
  */
-int process_line()
+bool process_line()
 {
   char *cmd = strtok(line, in_line_delimiters);
 
-  if( !strcmp(cmd, "exit") ) {
-    return false;
-  } else if( !strcmp(cmd, "start") ) {
-    return handle_start();
-  } else if( !strcmp(cmd, "stop") ) {
-    return handle_stop();
-  } else if( !strcmp(cmd, "list") ) {
-    return handle_list();
+  for(int index = 0; shell_commands[index].keyword; index++) {
+    if( !strcmp(cmd, shell_commands[index].keyword) )
+      return shell_commands[index].shell_command();
   }
 
   fflush(NULL);

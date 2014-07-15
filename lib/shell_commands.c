@@ -1,100 +1,7 @@
 #include "shell_commands.h"
 
-int extract_month_params(int *year, int *month);
-void print_time(struct tm *time, const char *end_with);
-int ask_for_confirmation(char *confirm_for);
-int answer_to_boolean(char *answer);
-
-struct tm *current_start = NULL;
-
-struct tm * retrieve_now(struct tm *storage)
-{
-  time_t now_epoch;
-  time(&now_epoch);
-  return localtime_r(&now_epoch, storage);
-}
-
-int handle_start()
-{
-  printf("encountered %s.\n", "start");
-  if( !current_start ) {
-    current_start = (struct tm *) malloc( sizeof(struct tm) );
-    current_start = retrieve_now(current_start);
-    printf("Started Session at: ");
-    print_time(current_start, "\n");
-  } else {
-    printf("Already running a session, since: ");
-    print_time(current_start, "\n");
-  }
-  return true;
-}
-
-int handle_stop()
-{
-  printf("encountered %s.\n", "stop");
-  if( current_start ) {
-    struct tm *current_stop = (struct tm *) malloc( sizeof(struct tm) );
-    retrieve_now(current_stop);
-    printf("Stopped...\n");
-    printf("Session-Info:\n");
-    printf("Start: ");
-    print_time(current_start, "\n");
-    printf("End: ");
-    print_time(current_stop, "\n");
-
-    int store = ask_for_confirmation("Store the timeslot?");
-
-    if( store ) {
-      printf("Ok, i will store the timeslot...\n");
-      checkin_add(db_handler, current_start, current_stop);
-    } else {
-      printf("Storing of timeslot aborted.\n");
-    }
-
-    free(current_start);
-    current_start = NULL;
-    free(current_stop);
-  } else {
-    printf("There is no current session.\n");
-  }
-  return true;
-}
-
-int handle_list()
-{
-  struct tm now;
-  struct tm *now_p = retrieve_now(&now);
-
-  int *year_p = (int *) malloc( sizeof(int) );
-  int *month_p = (int *) malloc( sizeof(int) );
-
-  int success = extract_month_params(year_p, month_p);
-
-  switch( success ) {
-    case -1:
-    case 0:
-      free(year_p);
-      free(month_p);
-      month_p = NULL;
-      year_p = NULL;
-      break;
-    case 1:
-      free(year_p);
-      year_p = NULL;
-      break;
-    default:
-      break;
-  }
-
-  if( success ) {
-    checkin_list(db_handler, now_p, year_p, month_p);
-  }
-
-  free(month_p);
-  free(year_p);
-
-  return true;
-}
+tm_p current_start = NULL;
+const int margin_minutes = 15;
 
 /*
  * Returns false (zero), if errors were encountered.
@@ -129,7 +36,7 @@ int extract_month_params(int *year_p, int *month_p)
   }
 }
 
-void print_time(struct tm *time, const char *end_with)
+void print_time(tm_p time, const char *end_with)
 {
   char *time_string = (char *) malloc(20 * sizeof(char));
   strftime(time_string, 20, TIME_FORMAT, time);
