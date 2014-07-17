@@ -1,5 +1,8 @@
-language: c
+language: objective-c
 script: make cmake && make
 compiler:
   - clang
   - gcc
+before_script:
+  - brew update
+  - brew install cmake
