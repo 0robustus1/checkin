@@ -1,6 +1,9 @@
 #ifndef COMMON_H_OCCURED
 #define COMMON_H_OCCURED
 
+// needed for strptime on Linux systems
+#define _XOPEN_SOURCE
+
 #include <time.h>
 #include <sqlite3.h>
 #include <stdbool.h>
