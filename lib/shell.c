@@ -17,7 +17,9 @@ static shell_tuple_t shell_commands[] = {
   {.keyword = "list", .shell_command = handle_list},
   {.keyword = "exit", .shell_command = handle_exit},
   {.keyword = "report", .shell_command = handle_report},
-  {}, // end of array, sadly issues clang warning
+
+  // end of array effectively represents NULL value
+  {.keyword = NULL, .shell_command = NULL},
 };
 
 void checkin_shell()
