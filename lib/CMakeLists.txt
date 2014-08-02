@@ -8,6 +8,8 @@ add_library(timeslot timeslot.c)
 add_library(database database.c)
 add_library(commands commands.c)
 
+target_link_libraries(database ${SQLITE3_LIBRARIES})
+
 
 add_subdirectory(shell_commands)
 get_directory_property(shell_commands_libraries DIRECTORY shell_commands local_libraries)

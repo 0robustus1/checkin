@@ -8,3 +8,9 @@ add_library(shell_commands_exit exit.c)
 add_library(shell_commands_report report.c)
 
 set_property(DIRECTORY PROPERTY local_libraries shell_commands_start shell_commands_stop shell_commands_list shell_commands_exit shell_commands_report)
+
+target_link_libraries(shell_commands_start shell_commands timeslot)
+target_link_libraries(shell_commands_stop shell_commands timeslot)
+target_link_libraries(shell_commands_list shell_commands timeslot)
+target_link_libraries(shell_commands_exit shell_commands timeslot)
+target_link_libraries(shell_commands_report shell_commands timeslot)
